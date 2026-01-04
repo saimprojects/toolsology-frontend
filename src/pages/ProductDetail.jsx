@@ -54,20 +54,43 @@ const ProductDetail = () => {
     }
   }, [product]);
 
-  // Plan decoding function
-  const decodePlanDuration = (durationMonths) => {
-    if (!durationMonths && durationMonths !== 0) {
+  // NEW SCHEME: Plan decoding function
+  const decodePlanDuration = (durationCode) => {
+    if (!durationCode && durationCode !== 0) {
       return {
         displayDuration: '1 month',
         durationType: 'monthly',
-        durationValue: 1
+        durationValue: 1,
+        isLifetime: false
       };
     }
     
-    const codeStr = String(durationMonths);
+    const codeStr = String(durationCode);
     
-    // Special case for "lifetime" or very large values
-    if (codeStr === '20010' || codeStr === '0' || parseInt(durationMonths) >= 120) {
+    // Check for daily plan: starts with 9900
+    if (codeStr.startsWith('9900')) {
+      const days = parseInt(codeStr.substring(4)) || 30;
+      return {
+        displayDuration: `${days} days`,
+        durationType: 'daily',
+        durationValue: days,
+        isLifetime: false
+      };
+    }
+    
+    // Check for yearly plan: starts with 9910
+    if (codeStr.startsWith('9910')) {
+      const years = parseInt(codeStr.substring(4)) || 1;
+      return {
+        displayDuration: `${years} year${years > 1 ? 's' : ''}`,
+        durationType: 'yearly',
+        durationValue: years,
+        isLifetime: false
+      };
+    }
+    
+    // Check for lifetime plan: starts with 9920
+    if (codeStr.startsWith('9920')) {
       return {
         displayDuration: 'Lifetime',
         durationType: 'lifetime',
@@ -76,7 +99,7 @@ const ProductDetail = () => {
       };
     }
     
-    // Check if it's a yearly plan (starts with 200)
+    // Handle legacy codes for backward compatibility
     if (codeStr.startsWith('200')) {
       const years = parseInt(codeStr.substring(3)) || 1;
       return {
@@ -87,7 +110,6 @@ const ProductDetail = () => {
       };
     }
     
-    // Check if it's a daily plan (starts with 100)
     if (codeStr.startsWith('100')) {
       const days = parseInt(codeStr.substring(3)) || 30;
       return {
@@ -98,20 +120,8 @@ const ProductDetail = () => {
       };
     }
     
-    // Default monthly plan (simple number or other format)
-    const months = parseInt(durationMonths) || 1;
-    
-    // If months >= 12, convert to years
-    if (months >= 12) {
-      const years = Math.floor(months / 12);
-      return {
-        displayDuration: `${years} year${years > 1 ? 's' : ''}`,
-        durationType: 'yearly',
-        durationValue: years,
-        isLifetime: false
-      };
-    }
-    
+    // Default monthly plan
+    const months = parseInt(durationCode) || 1;
     return {
       displayDuration: `${months} month${months > 1 ? 's' : ''}`,
       durationType: 'monthly',
@@ -126,37 +136,37 @@ const ProductDetail = () => {
       setError(null);
       const data = await getProductById(id);
       
-      console.log('Product Data:', data); // Debug log
+      console.log('🎯 Product Data Received:', data);
+      console.log('📊 Plans Data:', data.plans);
       
-      // Format plans for display with decoding logic
+      // Format plans for display with NEW decoding logic
       if (data.plans && data.plans.length > 0) {
-        console.log('Raw Plans:', data.plans); // Debug log
-        
-        data.plans = data.plans.map((plan) => {
-          console.log('Processing plan:', plan); // Debug log
+        data.plans = data.plans.map((plan, index) => {
+          console.log(`📝 Processing Plan ${index + 1}:`, plan);
           
-          // Use duration_months field from your API response
+          // Use duration_months field from API
           const durationValue = plan.duration_months;
-          console.log('Duration months value:', durationValue); // Debug log
+          console.log(`🔢 Duration Code: ${durationValue} (Type: ${typeof durationValue})`);
           
           const decodedDuration = decodePlanDuration(durationValue);
-          console.log('Decoded duration:', decodedDuration); // Debug log
+          console.log(`🎯 Decoded:`, decodedDuration);
           
           return {
             ...plan,
             displayDuration: decodedDuration.displayDuration,
             durationType: decodedDuration.durationType,
             durationValue: decodedDuration.durationValue,
-            isLifetime: decodedDuration.isLifetime
+            isLifetime: decodedDuration.isLifetime,
+            originalDurationCode: durationValue // For debugging
           };
         });
         
-        console.log('Processed plans:', data.plans); // Debug log
+        console.log('✅ Final Processed Plans:', data.plans);
       }
       
       setProduct(data);
     } catch (err) {
-      console.error('Error fetching product:', err);
+      console.error('❌ Error fetching product:', err);
       setError(err.message || 'Product not found');
     } finally {
       setLoading(false);
@@ -264,11 +274,18 @@ I have a question about this tool. Please provide more details.`;
       case 'yearly':
         const yearlyRate = (price / plan.durationValue).toFixed(2);
         return `≈ PKR ${yearlyRate} / year`;
-      case 'monthly':
-        const monthlyRate = (price / plan.durationValue).toFixed(2);
-        return `≈ PKR ${monthlyRate} / month`;
       default:
         return '';
+    }
+  };
+
+  // Get plan badge text
+  const getPlanBadge = (plan) => {
+    switch (plan.durationType) {
+      case 'daily': return 'Daily Plan';
+      case 'yearly': return 'Yearly Plan';
+      case 'lifetime': return 'Lifetime';
+      default: return 'Monthly Plan';
     }
   };
 
@@ -411,12 +428,24 @@ I have a question about this tool. Please provide more details.`;
             {product.plans && product.plans.length > 0 && (
               <div className="bg-white rounded-xl border border-[#D1D5DB] p-6">
                 <h3 className="text-xl font-bold text-[#111827] mb-6">Choose Your Plan</h3>
+                
+                {/* Debug Info (Remove in production) */}
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                  <p className="font-semibold text-yellow-800">Debug Info:</p>
+                  {product.plans.map((plan, idx) => (
+                    <p key={idx} className="text-yellow-700">
+                      Plan {idx+1}: {plan.title} → Code: {plan.originalDurationCode} → Display: {plan.displayDuration}
+                    </p>
+                  ))}
+                </div>
+                
                 <div className="space-y-4 mb-6">
                   {product.plans.map((plan) => {
                     const PlanIcon = getPlanIcon(plan);
                     const isSelected = selectedPlan?.id === plan.id;
                     const description = getPlanDescription(plan);
                     const pricePerDuration = getPricePerDuration(plan);
+                    const badgeText = getPlanBadge(plan);
                     
                     return (
                       <div
@@ -434,24 +463,49 @@ I have a question about this tool. Please provide more details.`;
                           </div>
                         )}
                         
+                        {/* Plan Badge */}
+                        <div className="absolute -top-2 left-4">
+                          <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                            plan.durationType === 'lifetime' 
+                              ? 'bg-green-100 text-green-800'
+                              : plan.durationType === 'yearly'
+                              ? 'bg-blue-100 text-blue-800'
+                              : plan.durationType === 'daily'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {badgeText}
+                          </span>
+                        </div>
+                        
                         <div className="flex items-start justify-between mb-3">
-                          <div>
+                          <div className="w-full">
                             <div className="flex items-center mb-2">
                               <PlanIcon className={`w-5 h-5 mr-2 ${getPlanColor(plan)}`} />
-                              <h4 className="font-bold text-[#111827]">{plan.title}</h4>
+                              <h4 className="font-bold text-[#111827] text-lg">{plan.title}</h4>
                             </div>
-                            <p className="text-sm text-gray-500 mb-2">{description}</p>
-                            <div className="flex items-baseline">
-                              <span className="text-2xl font-bold text-[#111827]">PKR {plan.price}</span>
-                              <span className="text-gray-500 ml-2">
-                                / {plan.displayDuration}
-                              </span>
+                            <p className="text-sm text-gray-500 mb-3">{description}</p>
+                            
+                            <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                              <div className="flex items-baseline justify-between">
+                                <div>
+                                  <span className="text-2xl font-bold text-[#111827]">PKR {plan.price}</span>
+                                  <span className="text-gray-500 ml-2">
+                                    / {plan.displayDuration}
+                                  </span>
+                                </div>
+                                {plan.isLifetime && (
+                                  <span className="text-sm font-bold text-green-600">
+                                    🔥 BEST DEAL
+                                  </span>
+                                )}
+                              </div>
+                              {pricePerDuration && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                  {pricePerDuration}
+                                </p>
+                              )}
                             </div>
-                            {pricePerDuration && (
-                              <p className="text-sm text-gray-500 mt-1">
-                                {pricePerDuration}
-                              </p>
-                            )}
                           </div>
                         </div>
                         
