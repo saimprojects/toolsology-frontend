@@ -1,19 +1,36 @@
 // src/api.js
 
-// trailing slash hata do
-const API_BASE_URL = 'http://127.0.0.1:8000/'
+// Read base URL from Vite env
+// .env: VITE_API_URL=https://toolsology.up.railway.app/
+const RAW_BASE_URL = import.meta.env.VITE_API_URL;
+
+// Normalize: ensure it ends with single slash
+function normalizeBaseUrl(url) {
+  try {
+    const u = new URL(url);
+    // Ensure trailing slash
+    return u.origin + (u.pathname.endsWith("/") ? u.pathname : u.pathname + "/");
+  } catch (e) {
+    // Fallback if env URL is invalid
+    return "http://127.0.0.1:8000/";
+  }
+}
+
+const API_BASE_URL = normalizeBaseUrl(RAW_BASE_URL);
+
+// Join base + path safely (avoid double slashes)
+function joinUrl(base, path) {
+  if (!path) return base;
+  // absolute pagination url
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+
+  const cleanBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
+}
 
 async function request(path, options = {}) {
-  let url;
-  
-  // Check if path is already a full URL (for pagination next/previous URLs)
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    url = path;
-  } else {
-    // Relative path
-    const cleanPath = path.startsWith("/") ? path : `/${path}`;
-    url = `${API_BASE_URL}${cleanPath}`;
-  }
+  const url = joinUrl(API_BASE_URL, path);
 
   const res = await fetch(url, {
     ...options,
@@ -52,7 +69,6 @@ async function request(path, options = {}) {
 export async function getProducts() {
   try {
     const data = await request("/api/products/");
-    // Return just the array of products
     return data?.results || data || [];
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -67,18 +83,16 @@ export async function getAllProducts() {
     let currentUrl = "/api/products/";
     let page = 1;
     const maxPages = 5; // Safety limit
-    
+
     while (currentUrl && page <= maxPages) {
       try {
         const data = await request(currentUrl);
-        
+
         if (data && data.results && data.results.length > 0) {
           allProducts = [...allProducts, ...data.results];
-          currentUrl = data.next; // Next page URL (could be absolute or relative)
-          
-          // If no next page, break
+          currentUrl = data.next; // can be absolute or relative
+
           if (!currentUrl) break;
-          
           page++;
         } else {
           break;
@@ -88,12 +102,12 @@ export async function getAllProducts() {
         break;
       }
     }
-    
-    console.log(`Fetched ${allProducts.length} products from ${page-1} pages`);
+
+    console.log(`Fetched ${allProducts.length} products from ${page - 1} pages`);
     return allProducts;
   } catch (error) {
     console.error("Error in getAllProducts:", error);
-    
+
     // Fallback: Try to get at least one page
     try {
       const fallbackData = await request("/api/products/");
