@@ -430,14 +430,14 @@ I have a question about this tool. Please provide more details.`;
                 <h3 className="text-xl font-bold text-[#111827] mb-6">Choose Your Plan</h3>
                 
                 {/* Debug Info (Remove in production) */}
-                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                {/* <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
                   <p className="font-semibold text-yellow-800">Debug Info:</p>
                   {product.plans.map((plan, idx) => (
                     <p key={idx} className="text-yellow-700">
                       Plan {idx+1}: {plan.title} → Code: {plan.originalDurationCode} → Display: {plan.displayDuration}
                     </p>
                   ))}
-                </div>
+                </div> */}
                 
                 <div className="space-y-4 mb-6">
                   {product.plans.map((plan) => {
