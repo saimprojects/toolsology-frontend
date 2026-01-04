@@ -53,39 +53,63 @@ const ProductDetail = () => {
     }
   }, [product]);
 
+  // Plan decoding function
+  const decodePlanDuration = (durationCode) => {
+    if (!durationCode && durationCode !== 0) {
+      return {
+        displayDuration: '1 month',
+        durationType: 'monthly',
+        durationValue: 1
+      };
+    }
+    
+    const codeStr = String(durationCode);
+    
+    // Check if it's a yearly plan (starts with 200)
+    if (codeStr.startsWith('200')) {
+      const years = parseInt(codeStr.substring(3)) || 1;
+      return {
+        displayDuration: `${years} year${years > 1 ? 's' : ''}`,
+        durationType: 'yearly',
+        durationValue: years
+      };
+    }
+    
+    // Check if it's a daily plan (starts with 100)
+    if (codeStr.startsWith('100')) {
+      const days = parseInt(codeStr.substring(3)) || 30;
+      return {
+        displayDuration: `${days} days`,
+        durationType: 'daily',
+        durationValue: days
+      };
+    }
+    
+    // Default monthly plan (simple number or other format)
+    const months = parseInt(durationCode) || 1;
+    return {
+      displayDuration: `${months} month${months > 1 ? 's' : ''}`,
+      durationType: 'monthly',
+      durationValue: months
+    };
+  };
+
   const fetchProduct = async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await getProductById(id);
       
-      // Format plans for display
+      // Format plans for display with decoding logic
       if (data.plans && data.plans.length > 0) {
         data.plans = data.plans.map((plan) => {
-          let displayDuration = '1 month';
-          let durationType = 'monthly';
-          
-          if (plan.duration_code || plan.duration) {
-            const duration = plan.duration_code || plan.duration;
-            if (typeof duration === 'string' && duration.startsWith('100')) {
-              const days = parseInt(duration.substring(3)) || 30;
-              displayDuration = `${days} days`;
-              durationType = 'daily';
-            } else if (typeof duration === 'string' && duration.startsWith('200')) {
-              const years = parseInt(duration.substring(3)) || 1;
-              displayDuration = `${years} year${years > 1 ? 's' : ''}`;
-              durationType = 'yearly';
-            } else {
-              const months = parseInt(duration) || 1;
-              displayDuration = `${months} month${months > 1 ? 's' : ''}`;
-              durationType = 'monthly';
-            }
-          }
+          const decodedDuration = decodePlanDuration(plan.duration_code || plan.duration);
           
           return {
             ...plan,
-            displayDuration,
-            durationType
+            displayDuration: decodedDuration.displayDuration,
+            durationType: decodedDuration.durationType,
+            durationValue: decodedDuration.durationValue
           };
         });
       }
@@ -167,6 +191,17 @@ I have a question about this tool. Please provide more details.`;
       case 'daily': return 'text-[#FACC15]';
       case 'yearly': return 'text-[#1E3A8A]';
       default: return 'text-gray-600';
+    }
+  };
+
+  const getPlanDescription = (plan) => {
+    switch (plan.durationType) {
+      case 'daily': 
+        return `Pay for ${plan.durationValue} days of access`;
+      case 'yearly': 
+        return `Best value - ${plan.durationValue} year${plan.durationValue > 1 ? 's' : ''} access`;
+      default: 
+        return `${plan.durationValue} month${plan.durationValue > 1 ? 's' : ''} access`;
     }
   };
 
@@ -313,6 +348,7 @@ I have a question about this tool. Please provide more details.`;
                   {product.plans.map((plan) => {
                     const PlanIcon = getPlanIcon(plan);
                     const isSelected = selectedPlan?.id === plan.id;
+                    const description = getPlanDescription(plan);
                     
                     return (
                       <div
@@ -336,6 +372,7 @@ I have a question about this tool. Please provide more details.`;
                               <PlanIcon className={`w-5 h-5 mr-2 ${getPlanColor(plan)}`} />
                               <h4 className="font-bold text-[#111827]">{plan.title}</h4>
                             </div>
+                            <p className="text-sm text-gray-500 mb-2">{description}</p>
                             <div className="flex items-baseline">
                               <span className="text-2xl font-bold text-[#111827]">PKR {plan.price}</span>
                               <span className="text-gray-500 ml-2">
@@ -371,6 +408,7 @@ I have a question about this tool. Please provide more details.`;
                       <div>
                         <h4 className="font-bold text-[#111827]">Selected Plan</h4>
                         <p className="text-gray-600">{selectedPlan.title}</p>
+                        <p className="text-sm text-gray-500">{getPlanDescription(selectedPlan)}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-xl font-bold text-[#111827]">PKR {selectedPlan.price}</div>
