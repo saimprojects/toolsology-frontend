@@ -14,7 +14,8 @@ import {
   Users,
   TrendingUp,
   MessageCircle,
-  Download
+  Download,
+  Infinity
 } from 'lucide-react';
 import ImageGallery from '../components/products/ImageGallery';
 import ReviewList from '../components/products/ReviewList';
@@ -54,8 +55,8 @@ const ProductDetail = () => {
   }, [product]);
 
   // Plan decoding function
-  const decodePlanDuration = (durationCode) => {
-    if (!durationCode && durationCode !== 0) {
+  const decodePlanDuration = (durationMonths) => {
+    if (!durationMonths && durationMonths !== 0) {
       return {
         displayDuration: '1 month',
         durationType: 'monthly',
@@ -63,7 +64,17 @@ const ProductDetail = () => {
       };
     }
     
-    const codeStr = String(durationCode);
+    const codeStr = String(durationMonths);
+    
+    // Special case for "lifetime" or very large values
+    if (codeStr === '20010' || codeStr === '0' || parseInt(durationMonths) >= 120) {
+      return {
+        displayDuration: 'Lifetime',
+        durationType: 'lifetime',
+        durationValue: 9999,
+        isLifetime: true
+      };
+    }
     
     // Check if it's a yearly plan (starts with 200)
     if (codeStr.startsWith('200')) {
@@ -71,7 +82,8 @@ const ProductDetail = () => {
       return {
         displayDuration: `${years} year${years > 1 ? 's' : ''}`,
         durationType: 'yearly',
-        durationValue: years
+        durationValue: years,
+        isLifetime: false
       };
     }
     
@@ -81,16 +93,30 @@ const ProductDetail = () => {
       return {
         displayDuration: `${days} days`,
         durationType: 'daily',
-        durationValue: days
+        durationValue: days,
+        isLifetime: false
       };
     }
     
     // Default monthly plan (simple number or other format)
-    const months = parseInt(durationCode) || 1;
+    const months = parseInt(durationMonths) || 1;
+    
+    // If months >= 12, convert to years
+    if (months >= 12) {
+      const years = Math.floor(months / 12);
+      return {
+        displayDuration: `${years} year${years > 1 ? 's' : ''}`,
+        durationType: 'yearly',
+        durationValue: years,
+        isLifetime: false
+      };
+    }
+    
     return {
       displayDuration: `${months} month${months > 1 ? 's' : ''}`,
       durationType: 'monthly',
-      durationValue: months
+      durationValue: months,
+      isLifetime: false
     };
   };
 
@@ -100,18 +126,32 @@ const ProductDetail = () => {
       setError(null);
       const data = await getProductById(id);
       
+      console.log('Product Data:', data); // Debug log
+      
       // Format plans for display with decoding logic
       if (data.plans && data.plans.length > 0) {
+        console.log('Raw Plans:', data.plans); // Debug log
+        
         data.plans = data.plans.map((plan) => {
-          const decodedDuration = decodePlanDuration(plan.duration_code || plan.duration);
+          console.log('Processing plan:', plan); // Debug log
+          
+          // Use duration_months field from your API response
+          const durationValue = plan.duration_months;
+          console.log('Duration months value:', durationValue); // Debug log
+          
+          const decodedDuration = decodePlanDuration(durationValue);
+          console.log('Decoded duration:', decodedDuration); // Debug log
           
           return {
             ...plan,
             displayDuration: decodedDuration.displayDuration,
             durationType: decodedDuration.durationType,
-            durationValue: decodedDuration.durationValue
+            durationValue: decodedDuration.durationValue,
+            isLifetime: decodedDuration.isLifetime
           };
         });
+        
+        console.log('Processed plans:', data.plans); // Debug log
       }
       
       setProduct(data);
@@ -182,6 +222,7 @@ I have a question about this tool. Please provide more details.`;
     switch (plan.durationType) {
       case 'daily': return Zap;
       case 'yearly': return TrendingUp;
+      case 'lifetime': return Infinity;
       default: return Clock;
     }
   };
@@ -190,6 +231,7 @@ I have a question about this tool. Please provide more details.`;
     switch (plan.durationType) {
       case 'daily': return 'text-[#FACC15]';
       case 'yearly': return 'text-[#1E3A8A]';
+      case 'lifetime': return 'text-green-600';
       default: return 'text-gray-600';
     }
   };
@@ -200,8 +242,33 @@ I have a question about this tool. Please provide more details.`;
         return `Pay for ${plan.durationValue} days of access`;
       case 'yearly': 
         return `Best value - ${plan.durationValue} year${plan.durationValue > 1 ? 's' : ''} access`;
+      case 'lifetime':
+        return `One-time payment, lifetime access`;
       default: 
         return `${plan.durationValue} month${plan.durationValue > 1 ? 's' : ''} access`;
+    }
+  };
+
+  // Helper function to get plan price per duration
+  const getPricePerDuration = (plan) => {
+    if (plan.isLifetime) {
+      return 'One-time payment';
+    }
+    
+    const price = parseFloat(plan.price) || 0;
+    
+    switch (plan.durationType) {
+      case 'daily':
+        const dailyRate = (price / plan.durationValue).toFixed(2);
+        return `≈ PKR ${dailyRate} / day`;
+      case 'yearly':
+        const yearlyRate = (price / plan.durationValue).toFixed(2);
+        return `≈ PKR ${yearlyRate} / year`;
+      case 'monthly':
+        const monthlyRate = (price / plan.durationValue).toFixed(2);
+        return `≈ PKR ${monthlyRate} / month`;
+      default:
+        return '';
     }
   };
 
@@ -344,11 +411,12 @@ I have a question about this tool. Please provide more details.`;
             {product.plans && product.plans.length > 0 && (
               <div className="bg-white rounded-xl border border-[#D1D5DB] p-6">
                 <h3 className="text-xl font-bold text-[#111827] mb-6">Choose Your Plan</h3>
-                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="space-y-4 mb-6">
                   {product.plans.map((plan) => {
                     const PlanIcon = getPlanIcon(plan);
                     const isSelected = selectedPlan?.id === plan.id;
                     const description = getPlanDescription(plan);
+                    const pricePerDuration = getPricePerDuration(plan);
                     
                     return (
                       <div
@@ -379,6 +447,11 @@ I have a question about this tool. Please provide more details.`;
                                 / {plan.displayDuration}
                               </span>
                             </div>
+                            {pricePerDuration && (
+                              <p className="text-sm text-gray-500 mt-1">
+                                {pricePerDuration}
+                              </p>
+                            )}
                           </div>
                         </div>
                         
@@ -415,6 +488,11 @@ I have a question about this tool. Please provide more details.`;
                         <div className="text-sm text-gray-500">
                           {selectedPlan.displayDuration} access
                         </div>
+                        {getPricePerDuration(selectedPlan) && (
+                          <div className="text-xs text-green-600 font-medium">
+                            {getPricePerDuration(selectedPlan)}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
