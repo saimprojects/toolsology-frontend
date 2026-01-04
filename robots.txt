@@ -1,0 +1,9 @@
+# 📁 public/robots.txt
+User-agent: *
+Allow: /
+Sitemap: https://bunnytools.store/sitemap.xml
+
+# Disallow
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /api/
