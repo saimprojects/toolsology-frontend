@@ -82,9 +82,9 @@ export async function getAllProducts() {
     let allProducts = [];
     let currentUrl = "/api/products/";
     let page = 1;
-    const maxPages = 5; // Safety limit
 
-    while (currentUrl && page <= maxPages) {
+    // Unlimited pages - jab tak next page hai tab tak fetch karo
+    while (currentUrl) {
       try {
         const data = await request(currentUrl);
 
@@ -116,6 +116,19 @@ export async function getAllProducts() {
       console.error("Fallback also failed:", fallbackError);
       return [];
     }
+  }
+}
+
+// Alternative: Get products with custom page size
+export async function getAllProductsWithPageSize(pageSize = 100) {
+  try {
+    const data = await request(`/api/products/?page_size=${pageSize}`);
+    return data?.results || [];
+  } catch (error) {
+    console.error("Error fetching products with page size:", error);
+    
+    // Fallback to normal getAllProducts
+    return getAllProducts();
   }
 }
 
@@ -177,4 +190,63 @@ export async function getReviewStats() {
     console.warn("Review stats endpoint not available:", error.message);
     return null;
   }
+}
+
+/* =========================
+   UTILITY FUNCTIONS FOR DEBUGGING
+   ========================= */
+
+// Debug function to check how many pages exist
+export async function debugPagination() {
+  try {
+    const pages = [];
+    let currentUrl = "/api/products/";
+    let page = 1;
+
+    while (currentUrl && page <= 10) { // Safety limit of 10 pages for debugging
+      const data = await request(currentUrl);
+      pages.push({
+        page: page,
+        url: currentUrl,
+        count: data.count,
+        results: data.results.length,
+        next: data.next
+      });
+      
+      currentUrl = data.next;
+      if (!currentUrl) break;
+      page++;
+    }
+
+    console.table(pages);
+    console.log("Total products in API:", pages[0]?.count);
+    
+    const totalFetched = pages.reduce((sum, p) => sum + p.results, 0);
+    console.log("Total products fetched:", totalFetched);
+    
+    return pages;
+  } catch (error) {
+    console.error("Debug error:", error);
+    return [];
+  }
+}
+
+// Test function to check if we can get all products
+export async function testAllProducts() {
+  console.log("Testing API pagination...");
+  
+  // Method 1: Normal way
+  const products1 = await getAllProducts();
+  console.log(`Method 1 (unlimited pages): ${products1.length} products`);
+  
+  // Method 2: With page size
+  const products2 = await getAllProductsWithPageSize(100);
+  console.log(`Method 2 (page_size=100): ${products2.length} products`);
+  
+  // Check difference
+  if (products1.length !== products2.length) {
+    console.warn(`⚠️ Difference detected: ${products1.length} vs ${products2.length}`);
+  }
+  
+  return products1;
 }
