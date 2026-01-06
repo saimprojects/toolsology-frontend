@@ -22,7 +22,7 @@ import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import ReviewsPage from "./pages/ReviewPage";
 import RefundPolicy from "./pages/RefundPolicy";
-
+import useMetaPixel from "./api/hooks/useMetaPixel";
 // Providers
 import { ProductsProvider } from "./context/ProductsContext";
 import { WhatsAppProvider } from "./context/WhatsAppContext";
@@ -38,12 +38,17 @@ const RouteWrapper = ({ children }) => {
 
   return children;
 };
+function PixelTracker() {
+  useMetaPixel();
+  return null;
+}
 
 function App() {
   return (
     <WhatsAppProvider>
       <ProductsProvider>
         <Router>
+        <PixelTracker /> 
           <ScrollToTop />
           <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col">
             <Navbar />
