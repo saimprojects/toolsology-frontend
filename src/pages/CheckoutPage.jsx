@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldCheck, Copy, CheckCircle2, ArrowRight } from "lucide-react";
 import {
-  isLoggedIn, getStoreProduct, getRetailOffers, getPaymentMethods, retailCheckout,
+  isLoggedIn, getProduct, getRetailOffers, getPaymentMethods, retailCheckout,
 } from "../api/customer";
 
 export default function CheckoutPage() {
@@ -27,7 +27,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!isLoggedIn()) { nav(`/login?next=${encodeURIComponent(`/checkout/${productId}?offer=${offerId}`)}`); return; }
-    Promise.all([getStoreProduct(productId), getRetailOffers(productId), getPaymentMethods()])
+    Promise.all([getProduct(productId), getRetailOffers(productId), getPaymentMethods()])
       .then(([p, offers, pm]) => {
         setProduct(p);
         setOffer(offers.find((o) => o.offer_id === offerId) || offers[0] || null);

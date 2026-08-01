@@ -90,6 +90,10 @@ export async function getResellerProduct(id) {
   const list = await getResellerProducts();
   return list.find((p) => Number(p.id) === Number(id)) || null;
 }
+// Fetch any active product directly (works for stock-only products too).
+export async function getProduct(id) {
+  return req(`/api/products/${id}/`);
+}
 export async function getResellerOffers(productId) {
   const data = await req(`/api/sourcing/reseller/products/${productId}/offers/`, { auth: true });
   return Array.isArray(data) ? data : (data?.results || []);

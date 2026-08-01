@@ -69,6 +69,10 @@ export async function getStoreProduct(id) {
   const list = await getStoreProducts();
   return list.find((p) => Number(p.id) === Number(id)) || null;
 }
+// Fetch any active product directly (works for stock-only products too).
+export async function getProduct(id) {
+  return req(`/api/products/${id}/`);
+}
 export async function getPaymentMethods() {
   const data = await req("/api/payments/methods/");
   return data?.results || data || [];

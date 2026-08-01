@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useOutletContext, Link } from "react-router-dom";
 import {
-  getResellerProduct, getResellerOffers, getPaymentMethods,
+  getProduct, getResellerOffers, getPaymentMethods,
   walletPurchase, accountCheckout,
 } from "../../api/reseller";
 
@@ -22,7 +22,7 @@ export default function ProductDetail() {
   const [delivered, setDelivered] = useState(null);
 
   useEffect(() => {
-    Promise.all([getResellerProduct(id), getResellerOffers(id), getPaymentMethods()])
+    Promise.all([getProduct(id), getResellerOffers(id), getPaymentMethods()])
       .then(([p, ofs, pm]) => {
         setProduct(p); setOffers(ofs); setMethods(pm);
         setSelected(ofs.find((o) => o.in_stock) || null);
