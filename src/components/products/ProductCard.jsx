@@ -164,9 +164,12 @@ function ProductCard({ product, featured = false }) {
             <div className="flex flex-col">
               <div className="flex items-baseline gap-2">
                 <span className="text-xl font-bold text-[#111827]">
-                  {product.price !== null && product.price !== undefined
-                    ? `PKR ${product.price.toLocaleString()}`
-                    : "Contact for Price"}
+                  {(() => {
+                    const p = product.store_price ?? product.price;
+                    return p !== null && p !== undefined && p !== ""
+                      ? `PKR ${Number(p).toLocaleString()}`
+                      : "Contact for Price";
+                  })()}
                 </span>
                 
                 {product.original_price && product.price < product.original_price && (

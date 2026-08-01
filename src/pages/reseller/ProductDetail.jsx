@@ -15,6 +15,7 @@ export default function ProductDetail() {
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [expandedOffer, setExpandedOffer] = useState(null);
   const [mode, setMode] = useState(null); // 'choose' | 'wallet' | 'account'
   const [trx, setTrx] = useState("");
   const [busy, setBusy] = useState(false);
@@ -72,19 +73,35 @@ export default function ProductDetail() {
               {offers.length === 0 && <p className="text-gray-500 text-sm">No options available.</p>}
               {offers.map((o) => {
                 const isSel = selected?.offer_id === o.offer_id;
+                const isOpen = expandedOffer === o.offer_id;
                 return (
                   <div key={o.offer_id}
-                    onClick={() => o.in_stock && setSelected(o)}
-                    className={`rounded-lg border-2 p-3 flex items-center justify-between transition ${
+                    className={`rounded-lg border-2 p-3 transition ${
                       isSel ? "border-[#1E3A8A] bg-[#1E3A8A]/5" : "border-gray-200 hover:border-[#1E3A8A]/50"
-                    } ${o.in_stock ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}`}>
-                    <div>
-                      <div className="font-semibold">{o.label}</div>
-                      <div className={`text-xs ${o.in_stock ? "text-green-600" : "text-red-500"}`}>
-                        {o.in_stock ? "In stock" : "Out of stock"}
+                    } ${o.in_stock ? "" : "opacity-50"}`}>
+                    <div
+                      onClick={() => o.in_stock && setSelected(o)}
+                      className={`flex items-center justify-between ${o.in_stock ? "cursor-pointer" : "cursor-not-allowed"}`}>
+                      <div>
+                        <div className="font-semibold">{o.label}</div>
+                        <div className={`text-xs ${o.in_stock ? "text-green-600" : "text-red-500"}`}>
+                          {o.in_stock ? "In stock" : "Out of stock"}
+                        </div>
                       </div>
+                      <div className="font-bold text-[#1E3A8A]">Rs {o.price}</div>
                     </div>
-                    <div className="font-bold text-[#1E3A8A]">Rs {o.price}</div>
+                    {o.short_description && (
+                      <>
+                        <button type="button"
+                          onClick={(e) => { e.stopPropagation(); setExpandedOffer(isOpen ? null : o.offer_id); }}
+                          className="mt-2 text-xs font-medium text-[#1E3A8A]">
+                          {isOpen ? "▲ Hide details" : "▼ View details"}
+                        </button>
+                        {isOpen && (
+                          <p className="mt-1 text-sm text-gray-600 whitespace-pre-line">{o.short_description}</p>
+                        )}
+                      </>
+                    )}
                   </div>
                 );
               })}

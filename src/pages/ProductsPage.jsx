@@ -66,6 +66,11 @@ const ProductsPage = () => {
   const filterProducts = () => {
     let filtered = [...allProducts];
 
+    // Only sellable products (those with a live offer price)
+    filtered = filtered.filter(
+      product => product.store_price !== null && product.store_price !== undefined && product.store_price !== ""
+    );
+
     // Category filter
     if (selectedCategory) {
       filtered = filtered.filter(product =>
@@ -73,9 +78,9 @@ const ProductsPage = () => {
       );
     }
 
-    // Price filter
+    // Price filter (use the live store/offer price)
     filtered = filtered.filter(product => {
-      const price = parseFloat(product.price) || 0;
+      const price = parseFloat(product.store_price ?? product.price) || 0;
       return price >= priceRange[0] && price <= priceRange[1];
     });
 
@@ -91,15 +96,15 @@ const ProductsPage = () => {
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => {
-          const priceA = parseFloat(a.price) || 0;
-          const priceB = parseFloat(b.price) || 0;
+          const priceA = parseFloat(a.store_price ?? a.price) || 0;
+          const priceB = parseFloat(b.store_price ?? b.price) || 0;
           return priceA - priceB;
         });
         break;
       case 'price-high':
         filtered.sort((a, b) => {
-          const priceA = parseFloat(a.price) || 0;
-          const priceB = parseFloat(b.price) || 0;
+          const priceA = parseFloat(a.store_price ?? a.price) || 0;
+          const priceB = parseFloat(b.store_price ?? b.price) || 0;
           return priceB - priceA;
         });
         break;
@@ -437,7 +442,9 @@ const ProductsPage = () => {
                                 <h3 className="text-xl font-bold text-[#111827]">{product.title}</h3>
                                 <div className="text-right">
                                   <span className="text-2xl font-bold text-[#1E3A8A]">
-                                    ₹{product.price || 'Contact'}
+                                    {(product.store_price ?? product.price)
+                                      ? `PKR ${Number(product.store_price ?? product.price).toLocaleString()}`
+                                      : 'Contact'}
                                   </span>
                                   {product.original_price && (
                                     <div className="text-sm text-gray-500 line-through">

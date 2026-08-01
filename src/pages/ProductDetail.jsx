@@ -37,6 +37,7 @@ const ProductDetail = () => {
   const [offers, setOffers] = useState([]);
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [offersLoading, setOffersLoading] = useState(true);
+  const [expandedOffer, setExpandedOffer] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -453,21 +454,43 @@ I have a question about this tool. Please provide more details.`;
                 <div className="space-y-3">
                   {offers.map((o) => {
                     const isSel = selectedOffer?.offer_id === o.offer_id;
+                    const isOpen = expandedOffer === o.offer_id;
                     return (
                       <div
                         key={o.offer_id}
-                        onClick={() => o.in_stock && setSelectedOffer(o)}
-                        className={`rounded-xl border-2 p-4 flex items-center justify-between transition ${
+                        className={`rounded-xl border-2 p-4 transition ${
                           isSel ? 'border-[#1E3A8A] bg-[#1E3A8A]/5' : 'border-[#D1D5DB] hover:border-[#1E3A8A]/50'
-                        } ${o.in_stock ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                        } ${o.in_stock ? '' : 'opacity-50'}`}
                       >
-                        <div>
-                          <div className="font-bold text-[#111827]">{o.label}</div>
-                          <div className={`text-xs ${o.in_stock ? 'text-green-600' : 'text-red-500'}`}>
-                            {o.in_stock ? 'In stock' : 'Out of stock'}
+                        <div
+                          onClick={() => o.in_stock && setSelectedOffer(o)}
+                          className={`flex items-center justify-between ${o.in_stock ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                        >
+                          <div>
+                            <div className="font-bold text-[#111827]">{o.label}</div>
+                            <div className={`text-xs ${o.in_stock ? 'text-green-600' : 'text-red-500'}`}>
+                              {o.in_stock ? 'In stock' : 'Out of stock'}
+                            </div>
                           </div>
+                          <div className="text-lg font-bold text-[#1E3A8A]">PKR {o.price}</div>
                         </div>
-                        <div className="text-lg font-bold text-[#1E3A8A]">PKR {o.price}</div>
+
+                        {o.short_description && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setExpandedOffer(isOpen ? null : o.offer_id); }}
+                              className="mt-2 text-xs font-medium text-[#1E3A8A]"
+                            >
+                              {isOpen ? '▲ Hide details' : '▼ View details'}
+                            </button>
+                            {isOpen && (
+                              <p className="mt-1 text-sm text-gray-600 whitespace-pre-line">
+                                {o.short_description}
+                              </p>
+                            )}
+                          </>
+                        )}
                       </div>
                     );
                   })}
