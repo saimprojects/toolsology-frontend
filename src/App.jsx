@@ -24,6 +24,9 @@ import ReviewsPage from "./pages/ReviewPage";
 import RefundPolicy from "./pages/RefundPolicy";
 import CheckoutPage from "./pages/CheckoutPage";
 import ResellerPanel from "./pages/ResellerPanel";
+import ResellerSignup from "./pages/ResellerSignup";
+import ResellerLogin from "./pages/ResellerLogin";
+import ResellerDashboard from "./pages/ResellerDashboard";
 import useMetaPixel from "./api/hooks/useMetaPixel";
 // Providers
 import { ProductsProvider } from "./context/ProductsContext";
@@ -64,6 +67,9 @@ function App() {
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/checkout/:id" element={<CheckoutPage />} />
                     <Route path="/reseller" element={<ResellerPanel />} />
+                    <Route path="/reseller/signup" element={<ResellerSignup />} />
+                    <Route path="/reseller/login" element={<ResellerLogin />} />
+                    <Route path="/reseller/dashboard" element={<ResellerDashboard />} />
                     <Route
                       path="/solutions"
                       element={<SoftwareSolutionsPage />}
