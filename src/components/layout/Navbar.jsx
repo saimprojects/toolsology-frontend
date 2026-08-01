@@ -1,8 +1,9 @@
 // src/components/layout/Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, MessageCircle, ShoppingCart, Home, Package, Star, Users, Info, Store } from 'lucide-react';
+import { Menu, X, MessageCircle, ShoppingCart, Home, Package, Star, Users, Info, Store, LogIn, UserPlus, User, LogOut } from 'lucide-react';
 import { getWhatsAppNumber } from '../../api/api';
+import { isLoggedIn, clearTokens } from '../../api/customer';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -126,49 +127,40 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Desktop Action Buttons */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <Link 
-              to="/cart" 
-              className="relative p-2 text-[#111827] hover:text-[#1E3A8A] transition-colors"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 bg-[#FACC15] text-[#111827] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                0
-              </span>
-            </Link>
-            
-            {whatsappNumber ? (
-              <button
-                onClick={handleWhatsAppOrder}
-                className="group flex items-center space-x-2 bg-[#1E3A8A] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1E3A8A]/90 transition-all hover:shadow-lg border-2 border-[#1E3A8A]"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Order on WhatsApp</span>
-              </button>
+          {/* Desktop Action Buttons — customer auth */}
+          <div className="hidden lg:flex items-center space-x-3">
+            {isLoggedIn() ? (
+              <>
+                <Link to="/account"
+                  className="flex items-center space-x-2 text-[#111827] hover:text-[#1E3A8A] font-medium px-3 py-2">
+                  <User className="w-5 h-5" />
+                  <span>My Account</span>
+                </Link>
+                <button
+                  onClick={() => { clearTokens(); window.location.href = "/"; }}
+                  className="flex items-center space-x-2 text-gray-500 hover:text-red-600 font-medium px-3 py-2">
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
+                </button>
+              </>
             ) : (
-              <button
-                disabled
-                className="flex items-center space-x-2 bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold cursor-not-allowed"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Loading...</span>
-              </button>
+              <>
+                <Link to="/login"
+                  className="flex items-center space-x-2 text-[#1E3A8A] font-semibold px-4 py-2 rounded-lg border-2 border-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white transition-colors">
+                  <LogIn className="w-5 h-5" />
+                  <span>Login</span>
+                </Link>
+                <Link to="/signup"
+                  className="flex items-center space-x-2 bg-[#1E3A8A] text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-[#1E3A8A]/90 transition-all">
+                  <UserPlus className="w-5 h-5" />
+                  <span>Sign Up</span>
+                </Link>
+              </>
             )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-4">
-            <Link 
-              to="/cart" 
-              className="relative p-2 text-[#111827] hover:text-[#1E3A8A] transition-colors"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 bg-[#FACC15] text-[#111827] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                0
-              </span>
-            </Link>
-            
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 text-[#111827] hover:text-[#1E3A8A] transition-colors"
@@ -227,26 +219,34 @@ const Navbar = () => {
                 <span>Our Team</span>
               </button>
               
-              {/* WhatsApp Order Button - Mobile */}
-              {whatsappNumber ? (
-                <button
-                  onClick={() => {
-                    handleWhatsAppOrder();
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center space-x-3 bg-[#1E3A8A] text-white px-4 py-3 rounded-lg font-semibold mt-2"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  <span>Order on WhatsApp</span>
-                </button>
+              {/* Customer auth - Mobile */}
+              {isLoggedIn() ? (
+                <>
+                  <Link to="/account" onClick={() => setIsOpen(false)}
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-[#111827] hover:bg-[#F3F4F6]">
+                    <User className="w-5 h-5" />
+                    <span>My Account</span>
+                  </Link>
+                  <button
+                    onClick={() => { clearTokens(); setIsOpen(false); window.location.href = "/"; }}
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium text-red-600">
+                    <LogOut className="w-5 h-5" />
+                    <span>Logout</span>
+                  </button>
+                </>
               ) : (
-                <button
-                  disabled
-                  className="flex items-center space-x-3 bg-gray-400 text-white px-4 py-3 rounded-lg font-semibold mt-2 cursor-not-allowed"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  <span>Loading WhatsApp...</span>
-                </button>
+                <>
+                  <Link to="/login" onClick={() => setIsOpen(false)}
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg font-semibold text-[#1E3A8A] border-2 border-[#1E3A8A]">
+                    <LogIn className="w-5 h-5" />
+                    <span>Login</span>
+                  </Link>
+                  <Link to="/signup" onClick={() => setIsOpen(false)}
+                    className="flex items-center space-x-3 bg-[#1E3A8A] text-white px-4 py-3 rounded-lg font-semibold">
+                    <UserPlus className="w-5 h-5" />
+                    <span>Sign Up</span>
+                  </Link>
+                </>
               )}
             </div>
           </div>

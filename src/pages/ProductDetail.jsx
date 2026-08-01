@@ -20,6 +20,7 @@ import {
 import ImageGallery from '../components/products/ImageGallery';
 import ReviewList from '../components/products/ReviewList';
 import ProductCard from '../components/products/ProductCard';
+import BuyNowModal from '../components/products/BuyNowModal';
 import { getProductById } from '../api/api';
 import { useProducts } from '../api/hooks/useProducts';
 import { useWhatsApp } from '../context/WhatsAppContext';
@@ -31,7 +32,8 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  
+  const [showBuy, setShowBuy] = useState(false);
+
   const { whatsappNumber, loading: loadingWhatsapp } = useWhatsApp();
   const { products: allProducts } = useProducts();
 
@@ -551,23 +553,11 @@ I have a question about this tool. Please provide more details.`;
                     </div>
                     
                     <button
-                      onClick={handlePurchase}
-                      disabled={loadingWhatsapp}
-                      className={`w-full bg-[#1E3A8A] text-white py-3 rounded-lg font-bold hover:bg-[#1E3A8A]/90 hover:shadow-lg transition-all flex items-center justify-center ${
-                        loadingWhatsapp ? 'opacity-70 cursor-not-allowed' : ''
-                      }`}
+                      onClick={() => setShowBuy(true)}
+                      className="w-full bg-[#1E3A8A] text-white py-3 rounded-lg font-bold hover:bg-[#1E3A8A]/90 hover:shadow-lg transition-all flex items-center justify-center"
                     >
-                      {loadingWhatsapp ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                          Loading...
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingCart className="w-5 h-5 mr-2" />
-                          Buy Now - PKR {selectedPlan.price}
-                        </>
-                      )}
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Buy Now - PKR {selectedPlan.price}
                     </button>
                     
                     <div className="flex items-center justify-center mt-3 text-xs text-gray-500">
@@ -659,6 +649,14 @@ I have a question about this tool. Please provide more details.`;
           </div>
         )}
       </div>
+
+      <BuyNowModal
+        open={showBuy}
+        onClose={() => setShowBuy(false)}
+        product={product}
+        selectedPlan={selectedPlan}
+        onWhatsApp={() => { setShowBuy(false); handlePurchase(); }}
+      />
     </div>
   );
 };

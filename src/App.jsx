@@ -26,6 +26,9 @@ import CheckoutPage from "./pages/CheckoutPage";
 import ResellerPanel from "./pages/ResellerPanel";
 import ResellerSignup from "./pages/ResellerSignup";
 import ResellerLogin from "./pages/ResellerLogin";
+import CustomerLogin from "./pages/CustomerLogin";
+import CustomerSignup from "./pages/CustomerSignup";
+import CustomerAccount from "./pages/CustomerAccount";
 
 // Reseller panel (own layout)
 import ResellerLayout from "./components/reseller/ResellerLayout";
@@ -71,6 +74,10 @@ function MarketingLayout() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/reviews" element={<ReviewsPage />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
+              {/* Customer auth + account */}
+              <Route path="/login" element={<CustomerLogin />} />
+              <Route path="/signup" element={<CustomerSignup />} />
+              <Route path="/account" element={<CustomerAccount />} />
               {/* Reseller public pages */}
               <Route path="/reseller" element={<ResellerPanel />} />
               <Route path="/reseller/signup" element={<ResellerSignup />} />
