@@ -1,7 +1,7 @@
 // src/components/layout/Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, MessageCircle, ShoppingCart, Home, Package, Star, Users, Info } from 'lucide-react';
+import { Menu, X, MessageCircle, ShoppingCart, Home, Package, Star, Users, Info, Store } from 'lucide-react';
 import { getWhatsAppNumber } from '../../api/api';
 
 const Navbar = () => {
@@ -103,6 +103,19 @@ const Navbar = () => {
               );
             })}
             
+            {/* Reseller Panel */}
+            <Link
+              to="/reseller"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium border-2 border-[#1E3A8A] transition-colors ${
+                location.pathname.startsWith('/reseller')
+                  ? 'bg-[#1E3A8A] text-white'
+                  : 'text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white'
+              }`}
+            >
+              <Store className="w-4 h-4" />
+              <span>Reseller Panel</span>
+            </Link>
+
             {/* Our Team Button */}
             <button
               onClick={handleCommunityClick}
@@ -188,6 +201,20 @@ const Navbar = () => {
                 );
               })}
               
+              {/* Reseller Panel - Mobile */}
+              <Link
+                to="/reseller"
+                onClick={() => setIsOpen(false)}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium border-2 border-[#1E3A8A] ${
+                  location.pathname.startsWith('/reseller')
+                    ? 'bg-[#1E3A8A] text-white'
+                    : 'text-[#1E3A8A]'
+                }`}
+              >
+                <Store className="w-5 h-5" />
+                <span>Reseller Panel</span>
+              </Link>
+
               {/* Our Team Button - Mobile */}
               <button
                 onClick={() => {
