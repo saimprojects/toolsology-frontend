@@ -489,8 +489,8 @@ I have a question about this tool. Please provide more details.`;
               </div>
             </div>
 
-            {/* Plan Selection Section (legacy, hidden when no plans) */}
-            {product.plans && product.plans.length > 0 && (
+            {/* Plan Selection Section (legacy — permanently disabled) */}
+            {false && product.plans && product.plans.length > 0 && (
               <div className="bg-white rounded-xl border border-[#D1D5DB] p-6">
                 <h3 className="text-xl font-bold text-[#111827] mb-6">Choose Your Plan</h3>
                 
