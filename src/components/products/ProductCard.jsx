@@ -167,7 +167,7 @@ function ProductCard({ product, featured = false }) {
                   {(() => {
                     const p = product.store_price ?? product.price;
                     return p !== null && p !== undefined && p !== ""
-                      ? `PKR ${Number(p).toLocaleString()}`
+                      ? `PKR ${Math.ceil(Number(p)).toLocaleString()}`
                       : "Contact for Price";
                   })()}
                 </span>

@@ -443,7 +443,7 @@ const ProductsPage = () => {
                                 <div className="text-right">
                                   <span className="text-2xl font-bold text-[#1E3A8A]">
                                     {(product.store_price ?? product.price)
-                                      ? `PKR ${Number(product.store_price ?? product.price).toLocaleString()}`
+                                      ? `PKR ${Math.ceil(Number(product.store_price ?? product.price)).toLocaleString()}`
                                       : 'Contact'}
                                   </span>
                                   {product.original_price && (
