@@ -71,11 +71,11 @@ export function topupWallet(trx_id) {
     body: { trx_id },
   });
 }
-export function walletPurchase({ product_id, quantity = 1, customer_email = "", slot_months = null }) {
+export function walletPurchase({ product_id, offer_id, quantity = 1, customer_email = "", slot_months = null }) {
   return req("/api/reseller/wallet/purchase/", {
     method: "POST",
     auth: true,
-    body: { product_id, quantity, customer_email, slot_months, idempotency_key: genKey() },
+    body: { product_id, offer_id, quantity, customer_email, slot_months, idempotency_key: genKey() },
   });
 }
 export async function getResellerProducts() {
@@ -90,16 +90,20 @@ export async function getResellerProduct(id) {
   const list = await getResellerProducts();
   return list.find((p) => Number(p.id) === Number(id)) || null;
 }
+export async function getResellerOffers(productId) {
+  const data = await req(`/api/sourcing/reseller/products/${productId}/offers/`, { auth: true });
+  return Array.isArray(data) ? data : (data?.results || []);
+}
 export async function getOrders() {
   const data = await req("/api/reseller/orders/", { auth: true });
   return data?.results || data || [];
 }
 // "Pay via account" (SMS trx) for resellers — reseller price, auth required.
-export function accountCheckout({ product_id, quantity = 1, trx_id, customer_email = "", slot_months = null }) {
+export function accountCheckout({ product_id, offer_id, quantity = 1, trx_id, customer_email = "", slot_months = null }) {
   return req("/api/payments/checkout/reseller/", {
     method: "POST",
     auth: true,
-    body: { product_id, quantity, trx_id, customer_email, slot_months, idempotency_key: genKey() },
+    body: { product_id, offer_id, quantity, trx_id, customer_email, slot_months, idempotency_key: genKey() },
   });
 }
 export async function getPaymentMethods() {

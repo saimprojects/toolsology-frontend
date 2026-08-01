@@ -46,12 +46,18 @@ export async function getMyOrders() {
   return data?.results || data || [];
 }
 
-// Instant bank checkout (logged-in) — order gets tied to the customer.
-export function retailCheckout({ product_id, quantity = 1, trx_id, customer_email = "", slot_months = null }) {
+// Offers (attached bot products, labeled) for a product — no bot names.
+export async function getRetailOffers(productId) {
+  const data = await req(`/api/sourcing/retail/products/${productId}/offers/`);
+  return Array.isArray(data) ? data : (data?.results || []);
+}
+
+// Instant bank checkout (logged-in) — buys the CHOSEN offer.
+export function retailCheckout({ product_id, offer_id, quantity = 1, trx_id, customer_email = "", slot_months = null }) {
   return req("/api/payments/checkout/retail/", {
     method: "POST",
     auth: true,
-    body: { product_id, quantity, trx_id, customer_email, slot_months, idempotency_key: genKey() },
+    body: { product_id, offer_id, quantity, trx_id, customer_email, slot_months, idempotency_key: genKey() },
   });
 }
 

@@ -1,17 +1,20 @@
 // src/pages/CheckoutPage.jsx — retail instant-pay checkout (login required)
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldCheck, Copy, CheckCircle2, ArrowRight } from "lucide-react";
 import {
-  isLoggedIn, getStoreProduct, getPaymentMethods, retailCheckout,
+  isLoggedIn, getStoreProduct, getRetailOffers, getPaymentMethods, retailCheckout,
 } from "../api/customer";
 
 export default function CheckoutPage() {
   const { id } = useParams();
   const nav = useNavigate();
+  const [params] = useSearchParams();
   const productId = Number(id);
+  const offerId = Number(params.get("offer"));
 
   const [product, setProduct] = useState(null);
+  const [offer, setOffer] = useState(null);
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,23 +26,26 @@ export default function CheckoutPage() {
   const [copied, setCopied] = useState("");
 
   useEffect(() => {
-    if (!isLoggedIn()) { nav(`/login?next=/checkout/${productId}`); return; }
-    Promise.all([getStoreProduct(productId), getPaymentMethods()])
-      .then(([p, pm]) => { setProduct(p); setMethods(pm); })
+    if (!isLoggedIn()) { nav(`/login?next=/checkout/${productId}?offer=${offerId}`); return; }
+    Promise.all([getStoreProduct(productId), getRetailOffers(productId), getPaymentMethods()])
+      .then(([p, offers, pm]) => {
+        setProduct(p);
+        setOffer(offers.find((o) => o.offer_id === offerId) || offers[0] || null);
+        setMethods(pm);
+      })
       .finally(() => setLoading(false));
-  }, [productId, nav]);
-
-  const idem = useMemo(() => `${productId}-${trx.trim().toUpperCase()}`, [productId, trx]);
+  }, [productId, offerId, nav]);
 
   async function submit(e) {
     e.preventDefault();
     setError(""); setResult(null);
+    if (!offer) { setError("No plan selected."); return; }
     if (!trx.trim()) { setError("Please enter your Transaction ID (TID)."); return; }
     setSubmitting(true);
     try {
       const data = await retailCheckout({
-        product_id: productId, quantity: 1, trx_id: trx.trim(),
-        customer_email: email.trim(),
+        product_id: productId, offer_id: offer.offer_id, quantity: 1,
+        trx_id: trx.trim(), customer_email: email.trim(),
       });
       setResult(data);
     } catch (err) { setError(err.message); }
@@ -58,7 +64,8 @@ export default function CheckoutPage() {
     <div className="container mx-auto px-4 py-10 max-w-2xl">
       <h1 className="text-3xl font-bold text-[#111827] mb-1">Checkout</h1>
       <p className="text-gray-600 mb-8">
-        {product.title} — <span className="font-bold text-[#1E3A8A]">Rs {product.price}</span>
+        {product.title}{offer ? ` · ${offer.label}` : ""} —{" "}
+        <span className="font-bold text-[#1E3A8A]">Rs {offer?.price}</span>
       </p>
 
       {/* Success */}
@@ -125,7 +132,7 @@ export default function CheckoutPage() {
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button disabled={submitting}
               className="w-full bg-[#1E3A8A] text-white rounded-lg py-3 font-bold hover:bg-[#1E3A8A]/90 disabled:opacity-60">
-              {submitting ? "Verifying…" : `Verify & get instantly — Rs ${product.price}`}
+              {submitting ? "Verifying…" : `Verify & get instantly — Rs ${offer?.price}`}
             </button>
             <div className="flex items-center justify-center text-xs text-gray-500 gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-[#1E3A8A]" /> Just paid? If it says “not found yet”, wait a few seconds and retry.

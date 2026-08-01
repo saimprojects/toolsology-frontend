@@ -4,12 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { X, CreditCard, MessageCircle, Zap } from "lucide-react";
 import { isLoggedIn } from "../../api/customer";
 
-export default function BuyNowModal({ open, onClose, product, selectedPlan, onWhatsApp }) {
+export default function BuyNowModal({ open, onClose, product, offer, onWhatsApp }) {
   const nav = useNavigate();
   if (!open) return null;
 
   function payInstant() {
-    const next = `/checkout/${product.id}`;
+    if (!offer) return;
+    const next = `/checkout/${product.id}?offer=${offer.offer_id}`;
     if (!isLoggedIn()) {
       nav(`/login?next=${encodeURIComponent(next)}`);
     } else {
@@ -27,8 +28,8 @@ export default function BuyNowModal({ open, onClose, product, selectedPlan, onWh
 
         <h3 className="text-xl font-bold text-[#111827]">Complete your purchase</h3>
         <p className="text-gray-500 text-sm mb-1">{product.title}</p>
-        {selectedPlan && (
-          <p className="text-[#1E3A8A] font-bold mb-5">PKR {selectedPlan.price} · {selectedPlan.displayDuration}</p>
+        {offer && (
+          <p className="text-[#1E3A8A] font-bold mb-5">PKR {offer.price} · {offer.label}</p>
         )}
 
         <button onClick={payInstant}

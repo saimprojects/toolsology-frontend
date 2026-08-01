@@ -22,6 +22,7 @@ import ReviewList from '../components/products/ReviewList';
 import ProductCard from '../components/products/ProductCard';
 import BuyNowModal from '../components/products/BuyNowModal';
 import { getProductById } from '../api/api';
+import { getRetailOffers } from '../api/customer';
 import { useProducts } from '../api/hooks/useProducts';
 import { useWhatsApp } from '../context/WhatsAppContext';
 
@@ -33,6 +34,22 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showBuy, setShowBuy] = useState(false);
+  const [offers, setOffers] = useState([]);
+  const [selectedOffer, setSelectedOffer] = useState(null);
+  const [offersLoading, setOffersLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setOffersLoading(true);
+    getRetailOffers(id)
+      .then((data) => {
+        if (!alive) return;
+        setOffers(data);
+        setSelectedOffer(data.find((o) => o.in_stock) || null);
+      })
+      .finally(() => alive && setOffersLoading(false));
+    return () => { alive = false; };
+  }, [id]);
 
   const { whatsappNumber, loading: loadingWhatsapp } = useWhatsApp();
   const { products: allProducts } = useProducts();
@@ -176,22 +193,19 @@ const ProductDetail = () => {
   };
 
   const handlePurchase = () => {
-    if (!selectedPlan) {
-      alert('Please select a plan first');
-      return;
-    }
-
     if (!whatsappNumber) {
       alert('WhatsApp service is temporarily unavailable. Please try again in a moment.');
       return;
     }
 
+    const offerLine = selectedOffer
+      ? `📋 *Option:* ${selectedOffer.label}\n💰 *Price:* PKR ${selectedOffer.price}`
+      : '';
+
     const message = `🛒 *ORDER REQUEST - TOOLSOLOGY* 🛒
 
 📦 *Product:* ${product.title}
-📋 *Selected Plan:* ${selectedPlan.title}
-💰 *Price:* PKR ${selectedPlan.price}
-⏰ *Duration:* ${selectedPlan.displayDuration}
+${offerLine}
 
 ✅ *Key Features:*
 • Instant Digital Delivery
@@ -426,7 +440,56 @@ I have a question about this tool. Please provide more details.`;
               </div>
             </div>
 
-            {/* Plan Selection Section */}
+            {/* Offers (attached bot products — bot names hidden) */}
+            <div className="bg-white rounded-xl border border-[#D1D5DB] p-6">
+              <h3 className="text-xl font-bold text-[#111827] mb-4">Choose an option</h3>
+              {offersLoading ? (
+                <p className="text-gray-500">Loading options…</p>
+              ) : offers.length === 0 ? (
+                <p className="text-gray-500 text-sm">
+                  Online purchase isn't set up for this tool yet — please use “Order on WhatsApp”.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {offers.map((o) => {
+                    const isSel = selectedOffer?.offer_id === o.offer_id;
+                    return (
+                      <div
+                        key={o.offer_id}
+                        onClick={() => o.in_stock && setSelectedOffer(o)}
+                        className={`rounded-xl border-2 p-4 flex items-center justify-between transition ${
+                          isSel ? 'border-[#1E3A8A] bg-[#1E3A8A]/5' : 'border-[#D1D5DB] hover:border-[#1E3A8A]/50'
+                        } ${o.in_stock ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                      >
+                        <div>
+                          <div className="font-bold text-[#111827]">{o.label}</div>
+                          <div className={`text-xs ${o.in_stock ? 'text-green-600' : 'text-red-500'}`}>
+                            {o.in_stock ? 'In stock' : 'Out of stock'}
+                          </div>
+                        </div>
+                        <div className="text-lg font-bold text-[#1E3A8A]">PKR {o.price}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {selectedOffer && (
+                <button
+                  onClick={() => setShowBuy(true)}
+                  className="w-full mt-5 bg-[#1E3A8A] text-white py-3 rounded-lg font-bold hover:bg-[#1E3A8A]/90 hover:shadow-lg transition-all flex items-center justify-center"
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Buy Now - PKR {selectedOffer.price}
+                </button>
+              )}
+              <div className="flex items-center justify-center mt-3 text-xs text-gray-500">
+                <Shield className="w-3 h-3 mr-1 text-[#1E3A8A]" />
+                <span>Secure payment • Instant delivery</span>
+              </div>
+            </div>
+
+            {/* Plan Selection Section (legacy, hidden when no plans) */}
             {product.plans && product.plans.length > 0 && (
               <div className="bg-white rounded-xl border border-[#D1D5DB] p-6">
                 <h3 className="text-xl font-bold text-[#111827] mb-6">Choose Your Plan</h3>
@@ -654,7 +717,7 @@ I have a question about this tool. Please provide more details.`;
         open={showBuy}
         onClose={() => setShowBuy(false)}
         product={product}
-        selectedPlan={selectedPlan}
+        offer={selectedOffer}
         onWhatsApp={() => { setShowBuy(false); handlePurchase(); }}
       />
     </div>
