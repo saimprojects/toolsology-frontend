@@ -31,10 +31,10 @@ export default function ResellerSignup() {
       <form onSubmit={submit} className="space-y-4">
         <input className="w-full border rounded-lg px-3 py-2" placeholder="Username"
           value={form.username} onChange={set("username")} required />
-        <input className="w-full border rounded-lg px-3 py-2" type="email" placeholder="Email (optional)"
-          value={form.email} onChange={set("email")} />
-        <input className="w-full border rounded-lg px-3 py-2" placeholder="Phone (optional)"
-          value={form.phone} onChange={set("phone")} />
+        <input className="w-full border rounded-lg px-3 py-2" type="email" placeholder="Email"
+          value={form.email} onChange={set("email")} required />
+        <input className="w-full border rounded-lg px-3 py-2" placeholder="Phone"
+          value={form.phone} onChange={set("phone")} required />
         <input className="w-full border rounded-lg px-3 py-2" type="password" placeholder="Password (min 6)"
           value={form.password} onChange={set("password")} required minLength={6} />
         {error && <p className="text-red-600 text-sm">{error}</p>}

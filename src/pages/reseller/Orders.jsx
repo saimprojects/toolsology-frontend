@@ -42,10 +42,18 @@ export default function Orders() {
             {openId === o.id && o.delivered_accounts?.length > 0 && (
               <div className="mt-3 space-y-2">
                 {o.delivered_accounts.map((a, i) => (
-                  <div key={i} className="bg-gray-50 rounded p-2 text-sm">
-                    <div>User: {a.username}</div>
-                    <div>Pass: {a.password}</div>
-                    {a.verify_email && <div>Verify: {a.verify_email}</div>}
+                  <div key={i} className="bg-gray-50 rounded p-2 text-sm space-y-0.5">
+                    {a.details && Object.keys(a.details).length > 0 ? (
+                      Object.entries(a.details).map(([k, v]) => (
+                        <div key={k}>{k}: {v}</div>
+                      ))
+                    ) : (
+                      <>
+                        <div>User: {a.username}</div>
+                        <div>Pass: {a.password}</div>
+                        {a.verify_email && <div>Verify: {a.verify_email}</div>}
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

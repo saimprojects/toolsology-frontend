@@ -35,7 +35,7 @@ export default function CustomerSignup() {
           <input className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#1E3A8A]/30 outline-none"
             placeholder="Username" value={form.username} onChange={set("username")} required />
           <input className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#1E3A8A]/30 outline-none"
-            type="email" placeholder="Email (optional)" value={form.email} onChange={set("email")} />
+            type="email" placeholder="Email" value={form.email} onChange={set("email")} required />
           <input className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#1E3A8A]/30 outline-none"
             type="password" placeholder="Password (min 6)" value={form.password} onChange={set("password")} required minLength={6} />
           {error && <p className="text-red-600 text-sm">{error}</p>}

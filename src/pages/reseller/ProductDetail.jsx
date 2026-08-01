@@ -109,10 +109,18 @@ export default function ProductDetail() {
         <div className="bg-green-50 border border-green-200 rounded-xl p-5 mt-5">
           <h3 className="font-semibold text-green-800 mb-2">Purchased — your account(s):</h3>
           {delivered.map((a, i) => (
-            <div key={i} className="bg-white rounded p-3 mb-2 text-sm">
-              <div>User: {a.username}</div>
-              <div>Pass: {a.password}</div>
-              {a.verify_email && <div>Verify: {a.verify_email}</div>}
+            <div key={i} className="bg-white rounded p-3 mb-2 text-sm space-y-0.5">
+              {a.details && Object.keys(a.details).length > 0 ? (
+                Object.entries(a.details).map(([k, v]) => (
+                  <div key={k}>{k}: {v}</div>
+                ))
+              ) : (
+                <>
+                  <div>User: {a.username}</div>
+                  <div>Pass: {a.password}</div>
+                  {a.verify_email && <div>Verify: {a.verify_email}</div>}
+                </>
+              )}
             </div>
           ))}
         </div>

@@ -75,21 +75,34 @@ export default function CustomerAccount() {
             {o.delivered_accounts?.length > 0 && (
               <div className="space-y-2">
                 {o.delivered_accounts.map((a, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg p-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span><span className="text-gray-500">Username:</span> {a.username}</span>
-                      <button onClick={() => copy(a.username, `u${o.id}-${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
-                        {copied === `u${o.id}-${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span><span className="text-gray-500">Password:</span> {a.password}</span>
-                      <button onClick={() => copy(a.password, `p${o.id}-${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
-                        {copied === `p${o.id}-${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {a.verify_email && (
-                      <div className="mt-1"><span className="text-gray-500">Verify email:</span> {a.verify_email}</div>
+                  <div key={i} className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
+                    {a.details && Object.keys(a.details).length > 0 ? (
+                      Object.entries(a.details).map(([k, v]) => (
+                        <div key={k} className="flex items-center justify-between">
+                          <span><span className="text-gray-500">{k}:</span> {v}</span>
+                          <button onClick={() => copy(String(v), `${o.id}-${i}-${k}`)} className="text-gray-400 hover:text-[#1E3A8A]">
+                            {copied === `${o.id}-${i}-${k}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span><span className="text-gray-500">Username:</span> {a.username}</span>
+                          <button onClick={() => copy(a.username, `u${o.id}-${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
+                            {copied === `u${o.id}-${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span><span className="text-gray-500">Password:</span> {a.password}</span>
+                          <button onClick={() => copy(a.password, `p${o.id}-${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
+                            {copied === `p${o.id}-${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        {a.verify_email && (
+                          <div><span className="text-gray-500">Verify email:</span> {a.verify_email}</div>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}

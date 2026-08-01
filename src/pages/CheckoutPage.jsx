@@ -11,7 +11,7 @@ export default function CheckoutPage() {
   const nav = useNavigate();
   const [params] = useSearchParams();
   const productId = Number(id);
-  const offerId = Number(params.get("offer"));
+  const offerId = params.get("offer");
 
   const [product, setProduct] = useState(null);
   const [offer, setOffer] = useState(null);
@@ -26,7 +26,7 @@ export default function CheckoutPage() {
   const [copied, setCopied] = useState("");
 
   useEffect(() => {
-    if (!isLoggedIn()) { nav(`/login?next=/checkout/${productId}?offer=${offerId}`); return; }
+    if (!isLoggedIn()) { nav(`/login?next=${encodeURIComponent(`/checkout/${productId}?offer=${offerId}`)}`); return; }
     Promise.all([getStoreProduct(productId), getRetailOffers(productId), getPaymentMethods()])
       .then(([p, offers, pm]) => {
         setProduct(p);
@@ -75,20 +75,33 @@ export default function CheckoutPage() {
             <CheckCircle2 className="w-6 h-6" /> Payment verified — delivered!
           </div>
           {result.delivered_accounts?.map((a, i) => (
-            <div key={i} className="bg-gray-50 rounded-lg p-4 mb-3 text-sm">
-              <div className="flex justify-between items-center">
-                <span><span className="text-gray-500">Username:</span> {a.username}</span>
-                <button onClick={() => copy(a.username, `u${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
-                  {copied === `u${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="flex justify-between items-center mt-1">
-                <span><span className="text-gray-500">Password:</span> {a.password}</span>
-                <button onClick={() => copy(a.password, `p${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
-                  {copied === `p${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              {a.verify_email && <div className="mt-1"><span className="text-gray-500">Verify:</span> {a.verify_email}</div>}
+            <div key={i} className="bg-gray-50 rounded-lg p-4 mb-3 text-sm space-y-1">
+              {a.details && Object.keys(a.details).length > 0 ? (
+                Object.entries(a.details).map(([k, v]) => (
+                  <div key={k} className="flex justify-between items-center">
+                    <span><span className="text-gray-500">{k}:</span> {v}</span>
+                    <button onClick={() => copy(String(v), `${i}-${k}`)} className="text-gray-400 hover:text-[#1E3A8A]">
+                      {copied === `${i}-${k}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex justify-between items-center">
+                    <span><span className="text-gray-500">Username:</span> {a.username}</span>
+                    <button onClick={() => copy(a.username, `u${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
+                      {copied === `u${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span><span className="text-gray-500">Password:</span> {a.password}</span>
+                    <button onClick={() => copy(a.password, `p${i}`)} className="text-gray-400 hover:text-[#1E3A8A]">
+                      {copied === `p${i}` ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {a.verify_email && <div><span className="text-gray-500">Verify:</span> {a.verify_email}</div>}
+                </>
+              )}
             </div>
           ))}
           <Link to="/account" className="inline-flex items-center gap-1 text-[#1E3A8A] font-semibold mt-2">
