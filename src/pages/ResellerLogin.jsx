@@ -17,7 +17,7 @@ export default function ResellerLogin() {
     setBusy(true);
     try {
       await loginReseller(form);
-      nav("/reseller/dashboard");
+      nav("/reseller/app");
     } catch (err) {
       setError("Invalid username or password.");
     } finally {

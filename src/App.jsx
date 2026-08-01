@@ -26,26 +26,64 @@ import CheckoutPage from "./pages/CheckoutPage";
 import ResellerPanel from "./pages/ResellerPanel";
 import ResellerSignup from "./pages/ResellerSignup";
 import ResellerLogin from "./pages/ResellerLogin";
-import ResellerDashboard from "./pages/ResellerDashboard";
+
+// Reseller panel (own layout)
+import ResellerLayout from "./components/reseller/ResellerLayout";
+import Overview from "./pages/reseller/Overview";
+import ResellerProducts from "./pages/reseller/Products";
+import ResellerProductDetail from "./pages/reseller/ProductDetail";
+import ResellerOrders from "./pages/reseller/Orders";
+import ResellerSettings from "./pages/reseller/Settings";
+
 import useMetaPixel from "./api/hooks/useMetaPixel";
 // Providers
 import { ProductsProvider } from "./context/ProductsContext";
 import { WhatsAppProvider } from "./context/WhatsAppContext";
 
-// Custom wrapper component for scroll handling
 const RouteWrapper = ({ children }) => {
   const location = useLocation();
-
   useEffect(() => {
-    // Force scroll to top on every route change
     window.scrollTo(0, 0);
   }, [location.pathname]);
-
   return children;
 };
+
 function PixelTracker() {
   useMetaPixel();
   return null;
+}
+
+// Public marketing site (with navbar/footer/WhatsApp)
+function MarketingLayout() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col">
+      <Navbar />
+      <main className="flex-grow">
+        <React.Suspense fallback={<LoadingSpinner fullScreen />}>
+          <RouteWrapper>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/checkout/:id" element={<CheckoutPage />} />
+              <Route path="/solutions" element={<SoftwareSolutionsPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/reviews" element={<ReviewsPage />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              {/* Reseller public pages */}
+              <Route path="/reseller" element={<ResellerPanel />} />
+              <Route path="/reseller/signup" element={<ResellerSignup />} />
+              <Route path="/reseller/login" element={<ResellerLogin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </RouteWrapper>
+        </React.Suspense>
+      </main>
+      <Footer />
+      <WhatsAppButton />
+    </div>
+  );
 }
 
 function App() {
@@ -53,40 +91,21 @@ function App() {
     <WhatsAppProvider>
       <ProductsProvider>
         <Router>
-        <PixelTracker /> 
+          <PixelTracker />
           <ScrollToTop />
-          <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col">
-            <Navbar />
+          <Routes>
+            {/* Reseller panel — self-contained layout, no marketing chrome */}
+            <Route path="/reseller/app" element={<ResellerLayout />}>
+              <Route index element={<Overview />} />
+              <Route path="products" element={<ResellerProducts />} />
+              <Route path="products/:id" element={<ResellerProductDetail />} />
+              <Route path="orders" element={<ResellerOrders />} />
+              <Route path="settings" element={<ResellerSettings />} />
+            </Route>
 
-            <main className="flex-grow">
-              <React.Suspense fallback={<LoadingSpinner fullScreen />}>
-                <RouteWrapper>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/products" element={<ProductsPage />} />
-                    <Route path="/product/:id" element={<ProductDetail />} />
-                    <Route path="/checkout/:id" element={<CheckoutPage />} />
-                    <Route path="/reseller" element={<ResellerPanel />} />
-                    <Route path="/reseller/signup" element={<ResellerSignup />} />
-                    <Route path="/reseller/login" element={<ResellerLogin />} />
-                    <Route path="/reseller/dashboard" element={<ResellerDashboard />} />
-                    <Route
-                      path="/solutions"
-                      element={<SoftwareSolutionsPage />}
-                    />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/reviews" element={<ReviewsPage />} />
-                    <Route path="/refund-policy" element={<RefundPolicy />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </RouteWrapper>
-              </React.Suspense>
-            </main>
-
-            <Footer />
-            <WhatsAppButton />
-          </div>
+            {/* Everything else — public marketing site */}
+            <Route path="/*" element={<MarketingLayout />} />
+          </Routes>
         </Router>
       </ProductsProvider>
     </WhatsAppProvider>

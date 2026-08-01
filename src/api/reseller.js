@@ -86,6 +86,22 @@ export async function getTransactions() {
   const data = await req("/api/reseller/wallet/transactions/", { auth: true });
   return data?.results || data || [];
 }
+export async function getResellerProduct(id) {
+  const list = await getResellerProducts();
+  return list.find((p) => Number(p.id) === Number(id)) || null;
+}
+export async function getOrders() {
+  const data = await req("/api/reseller/orders/", { auth: true });
+  return data?.results || data || [];
+}
+// "Pay via account" (SMS trx) for resellers — reseller price, auth required.
+export function accountCheckout({ product_id, quantity = 1, trx_id, customer_email = "", slot_months = null }) {
+  return req("/api/payments/checkout/reseller/", {
+    method: "POST",
+    auth: true,
+    body: { product_id, quantity, trx_id, customer_email, slot_months, idempotency_key: genKey() },
+  });
+}
 export async function getPaymentMethods() {
   const data = await req("/api/payments/methods/");
   return data?.results || data || [];

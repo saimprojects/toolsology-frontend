@@ -17,7 +17,7 @@ export default function ResellerSignup() {
     setBusy(true);
     try {
       await registerReseller(form);
-      nav("/reseller/dashboard");
+      nav("/reseller/app");
     } catch (err) {
       setError(err.message || "Signup failed.");
     } finally {
