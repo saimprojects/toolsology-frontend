@@ -22,6 +22,7 @@ import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import ReviewsPage from "./pages/ReviewPage";
 import RefundPolicy from "./pages/RefundPolicy";
+import CheckoutPage from "./pages/CheckoutPage";
 import useMetaPixel from "./api/hooks/useMetaPixel";
 // Providers
 import { ProductsProvider } from "./context/ProductsContext";
@@ -60,6 +61,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/products" element={<ProductsPage />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/checkout/:id" element={<CheckoutPage />} />
                     <Route
                       path="/solutions"
                       element={<SoftwareSolutionsPage />}

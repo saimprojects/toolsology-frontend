@@ -158,6 +158,68 @@ export async function getWhatsAppNumber() {
 }
 
 /* =========================
+   SOURCING (curated storefront) + PAYMENTS
+   ========================= */
+
+// Products selected to show on the public store (with final retail price).
+export async function getStoreProducts() {
+  try {
+    const data = await request("/api/sourcing/retail/products/");
+    return data?.results || data || [];
+  } catch (error) {
+    console.error("Error fetching store products:", error);
+    return [];
+  }
+}
+
+// Bank/wallet accounts the customer can pay to.
+export async function getPaymentMethods() {
+  try {
+    const data = await request("/api/payments/methods/");
+    return data?.results || data || [];
+  } catch (error) {
+    console.error("Error fetching payment methods:", error);
+    return [];
+  }
+}
+
+// Verify a payment by Trx ID and fulfil the order.
+// Returns the order result (status + delivered_accounts) or throws with detail.
+export async function retailCheckout({
+  product_id,
+  quantity = 1,
+  trx_id,
+  customer_email = "",
+  slot_months = null,
+  idempotency_key,
+}) {
+  const body = {
+    product_id,
+    quantity,
+    trx_id,
+    customer_email,
+    slot_months,
+    idempotency_key: idempotency_key || genIdempotencyKey(),
+  };
+  const url = joinUrl(API_BASE_URL, "/api/payments/checkout/retail/");
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Checkout failed (HTTP ${res.status})`);
+  }
+  return data;
+}
+
+export function genIdempotencyKey() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return "idem-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+}
+
+/* =========================
    REVIEWS API METHODS
    ========================= */
 
