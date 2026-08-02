@@ -4,6 +4,7 @@ import { useOutletContext } from "react-router-dom";
 import { getPaymentMethods, getBinanceConfig, topupWallet, getTransactions } from "../../api/reseller";
 import { useCurrency } from "../../context/CurrencyContext";
 import GearLoader from "../../components/layout/GearLoader";
+import { Lock, ArrowUp } from "lucide-react";
 
 export default function Overview() {
   const { format } = useCurrency();
@@ -17,6 +18,9 @@ export default function Overview() {
   const paymentType = paymentChannel === "local" ? "local" : binanceMode;
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+  const minDeposit = Number(me?.min_deposit || 0);
+  const walletBalance = Number(me?.wallet_balance || 0);
+  const remainingDeposit = Math.max(0, minDeposit - walletBalance);
 
   async function load() {
     const [pm, t, bc] = await Promise.all([getPaymentMethods(), getTransactions(), getBinanceConfig()]);
@@ -90,6 +94,18 @@ export default function Overview() {
         </form>
       </div>
 
+      {!me?.can_operate ? (
+        <div className="rounded-[2rem] border border-zinc-200 bg-white p-8 text-center shadow-sm sm:p-12">
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-black text-white">
+            <Lock className="h-9 w-9" />
+          </div>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-zinc-400">Reseller panel locked</p>
+          <h2 className="text-3xl font-bold tracking-tight text-black">Deposit {format(me?.min_deposit)} to activate</h2>
+          <p className="mx-auto mt-4 max-w-xl text-zinc-500">Products, orders, settings and API access unlock automatically as soon as your verified wallet deposits reach <b className="text-black">{format(me?.min_deposit)}</b>.</p>
+          {walletBalance > 0 && <p className="mt-3 text-sm font-semibold text-black">Remaining to unlock: {format(remainingDeposit)}</p>}
+          <button type="button" onClick={() => window.scrollTo({ top: 260, behavior: "smooth" })} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 font-bold text-white hover:bg-zinc-800"><ArrowUp className="h-4 w-4" /> Deposit now</button>
+        </div>
+      ) : (
       <div className="bg-white border rounded-xl p-5">
         <h2 className="font-semibold mb-3">Recent transactions</h2>
         <div className="divide-y">
@@ -104,6 +120,7 @@ export default function Overview() {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }
