@@ -1,6 +1,7 @@
 // src/pages/reseller/Orders.jsx
 import React, { useEffect, useState } from "react";
 import { getOrders } from "../../api/reseller";
+import { useCurrency } from "../../context/CurrencyContext";
 
 const badge = {
   completed: "bg-green-100 text-green-700",
@@ -10,6 +11,7 @@ const badge = {
 };
 
 export default function Orders() {
+  const { format } = useCurrency();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
@@ -32,7 +34,7 @@ export default function Orders() {
               <div>
                 <div className="font-semibold">{o.product_title}</div>
                 <div className="text-xs text-gray-500">
-                  #{o.id} · Rs {o.sell_amount_pkr} · {new Date(o.created_at).toLocaleString()}
+                  #{o.id} · {format(o.sell_amount_pkr)} · {new Date(o.created_at).toLocaleString()}
                 </div>
               </div>
               <span className={`text-xs px-2 py-1 rounded-full ${badge[o.status] || ""}`}>

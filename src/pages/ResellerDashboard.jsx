@@ -5,8 +5,10 @@ import {
   isLoggedIn, clearTokens, getMe, topupWallet, walletPurchase,
   getResellerProducts, getTransactions, getPaymentMethods,
 } from "../api/reseller";
+import { useCurrency } from "../context/CurrencyContext";
 
 export default function ResellerDashboard() {
+  const { format } = useCurrency();
   const nav = useNavigate();
   const [me, setMe] = useState(null);
   const [products, setProducts] = useState([]);
@@ -78,9 +80,9 @@ export default function ResellerDashboard() {
       {/* Wallet */}
       <div className="bg-[#1E3A8A] text-white rounded-xl p-5 mb-6">
         <div className="text-sm opacity-80">Wallet balance</div>
-        <div className="text-3xl font-bold">Rs {me?.wallet_balance}</div>
+        <div className="text-3xl font-bold">{format(me?.wallet_balance)}</div>
         <div className="text-sm mt-1">
-          {activated ? "✓ Active" : `Deposit at least Rs ${me?.min_deposit} to activate`}
+          {activated ? "✓ Active" : `Deposit at least ${format(me?.min_deposit)} to activate`}
         </div>
       </div>
 
@@ -134,7 +136,7 @@ export default function ResellerDashboard() {
             {p.main_image && <img src={p.main_image} alt="" className="h-14 w-14 object-cover rounded" />}
             <div className="flex-1">
               <div className="font-semibold">{p.title}</div>
-              <div className="text-[#1E3A8A] font-bold">Rs {p.price}</div>
+              <div className="text-[#1E3A8A] font-bold">{format(p.price)}</div>
               <div className="text-xs text-gray-500">{p.in_stock ? "In stock" : "Out of stock"}</div>
             </div>
             <button

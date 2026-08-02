@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getResellerProducts } from "../../api/reseller";
+import { useCurrency } from "../../context/CurrencyContext";
 
 export default function Products() {
+  const { format } = useCurrency();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +26,7 @@ export default function Products() {
               <img src={p.main_image} alt={p.title} className="h-32 w-full object-cover rounded-lg mb-3" />
             )}
             <div className="font-semibold">{p.title}</div>
-            <div className="text-[#1E3A8A] font-bold">Rs {p.price}</div>
+            <div className="text-[#1E3A8A] font-bold">{format(p.price)}</div>
             <div className={`text-xs mt-1 ${p.in_stock ? "text-green-600" : "text-red-500"}`}>
               {p.in_stock ? "In stock" : "Out of stock"}
             </div>

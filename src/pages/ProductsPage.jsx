@@ -5,8 +5,10 @@ import ProductCard from '../components/products/ProductCard';
 import ProductFilters from '../components/products/ProductFilters';
 import { getAllProducts, getCategories } from '../api/api';
 import { Filter, Grid, List, Search, Sliders, ChevronDown, Loader, ShoppingCart, Tag, TrendingUp, Zap } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 const ProductsPage = () => {
+  const { format } = useCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
@@ -443,7 +445,7 @@ const ProductsPage = () => {
                                 <div className="text-right">
                                   <span className="text-2xl font-bold text-[#1E3A8A]">
                                     {(product.store_price ?? product.price)
-                                      ? `PKR ${Math.ceil(Number(product.store_price ?? product.price)).toLocaleString()}`
+                                      ? format(product.store_price ?? product.price)
                                       : 'Contact'}
                                   </span>
                                   {product.original_price && (

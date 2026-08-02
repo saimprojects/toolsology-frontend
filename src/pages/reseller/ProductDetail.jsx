@@ -2,17 +2,22 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useOutletContext, Link } from "react-router-dom";
 import {
-  getProduct, getResellerOffers, getPaymentMethods,
+  getProduct, getResellerOffers, getPaymentMethods, getBinanceConfig,
   walletPurchase, accountCheckout,
 } from "../../api/reseller";
+import { useCurrency } from "../../context/CurrencyContext";
 
 export default function ProductDetail() {
+  const { currency, format } = useCurrency();
   const { id } = useParams();
   const { me, refresh } = useOutletContext();
   const [product, setProduct] = useState(null);
   const [offers, setOffers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [methods, setMethods] = useState([]);
+  const [binance, setBinance] = useState({ enabled: false });
+  const [binanceMode, setBinanceMode] = useState("binance");
+  const paymentType = currency === "USD" ? binanceMode : "local";
   const [loading, setLoading] = useState(true);
 
   const [expandedOffer, setExpandedOffer] = useState(null);
@@ -23,9 +28,11 @@ export default function ProductDetail() {
   const [delivered, setDelivered] = useState(null);
 
   useEffect(() => {
-    Promise.all([getProduct(id), getResellerOffers(id), getPaymentMethods()])
-      .then(([p, ofs, pm]) => {
+    Promise.all([getProduct(id), getResellerOffers(id), getPaymentMethods(), getBinanceConfig()])
+      .then(([p, ofs, pm, bc]) => {
         setProduct(p); setOffers(ofs); setMethods(pm);
+        setBinance(bc);
+        if (!bc.wallet_enabled && bc.pay_id_enabled) setBinanceMode("binance_id");
         setSelected(ofs.find((o) => o.in_stock) || null);
       })
       .finally(() => setLoading(false));
@@ -48,7 +55,7 @@ export default function ProductDetail() {
     e.preventDefault();
     setBusy(true); setError("");
     try {
-      const order = await accountCheckout({ product_id: product.id, offer_id: selected.offer_id, trx_id: trx.trim() });
+      const order = await accountCheckout({ product_id: product.id, offer_id: selected.offer_id, trx_id: trx.trim(), payment_type: paymentType });
       handleResult(order);
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
@@ -88,7 +95,7 @@ export default function ProductDetail() {
                           {o.in_stock ? "In stock" : "Out of stock"}
                         </div>
                       </div>
-                      <div className="font-bold text-[#1E3A8A]">Rs {o.price}</div>
+                      <div className="font-bold text-[#1E3A8A]">{format(o.price)}</div>
                     </div>
                     {o.short_description && (
                       <>
@@ -110,7 +117,7 @@ export default function ProductDetail() {
             {selected && !delivered && (
               <button onClick={() => setMode("choose")}
                 className="mt-4 bg-[#1E3A8A] text-white px-6 py-2.5 rounded-lg font-semibold">
-                Buy — Rs {selected.price}
+                Buy — {format(selected.price)}
               </button>
             )}
           </div>
@@ -152,7 +159,7 @@ export default function ProductDetail() {
               <button onClick={() => setMode("wallet")}
                 className="border-2 border-[#1E3A8A] rounded-lg p-4 text-left hover:bg-blue-50">
                 <div className="font-semibold text-[#1E3A8A]">Pay via Wallet</div>
-                <div className="text-sm text-gray-500">Balance: Rs {me?.wallet_balance}</div>
+                <div className="text-sm text-gray-500">Balance: {format(me?.wallet_balance)}</div>
               </button>
               <button onClick={() => setMode("account")}
                 className="border-2 border-gray-300 rounded-lg p-4 text-left hover:bg-gray-50">
@@ -164,7 +171,7 @@ export default function ProductDetail() {
 
           {mode === "wallet" && (
             <div>
-              <p className="mb-3 text-sm">Pay <b>Rs {selected.price}</b> ({selected.label}) from wallet (balance Rs {me?.wallet_balance}).</p>
+              <p className="mb-3 text-sm">Pay <b>{format(selected.price)}</b> ({selected.label}) from wallet (balance {format(me?.wallet_balance)}).</p>
               <button disabled={busy} onClick={payWallet}
                 className="bg-[#1E3A8A] text-white px-6 py-2.5 rounded-lg font-semibold disabled:opacity-60">
                 {busy ? "Processing…" : "Confirm wallet payment"}
@@ -175,17 +182,22 @@ export default function ProductDetail() {
 
           {mode === "account" && (
             <form onSubmit={payAccount}>
-              <p className="text-sm mb-2">Send <b>Rs {selected.price}</b> to:</p>
+              <div className="text-sm bg-gray-50 border rounded-lg p-2 mb-3">{currency === "USD" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}</div>
+              {currency === "USD" && binance.wallet_enabled && binance.pay_id_enabled && <div className="flex gap-2 mb-3"><button type="button" onClick={() => setBinanceMode("binance")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance" ? "border-yellow-500 bg-yellow-50" : ""}`}>Wallet address</button><button type="button" onClick={() => setBinanceMode("binance_id")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance_id" ? "border-yellow-500 bg-yellow-50" : ""}`}>Binance ID</button></div>}
+              <p className="text-sm mb-2">Send <b>{format(selected.price)}</b> to:</p>
               <div className="space-y-1 text-sm mb-3">
-                {methods.map((m) => (
+                {paymentType === "local" && methods.map((m) => (
                   <div key={m.id} className="flex items-center gap-2">
                     {m.icon && <img src={m.icon} alt="" className="h-5 w-5 object-contain" />}
                     <span className="font-medium">{m.name}:</span>
                     <span className="font-mono">{m.account_number}</span>
                   </div>
                 ))}
+                {paymentType === "binance" && binance.wallet_enabled && <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3"><div>Send <b>{(Math.ceil((Number(selected.price) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b> via <b>{binance.network}</b></div><div className="font-mono break-all mt-1">{binance.address}</div></div>}
+                {paymentType === "binance_id" && binance.pay_id_enabled && <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3"><div>Send <b>{(Math.ceil((Number(selected.price) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b> to Binance ID</div><div className="font-mono mt-1">{binance.pay_id}</div></div>}
+                {currency === "USD" && !binance.enabled && <p className="text-red-600">Binance is unavailable. Select PKR from the currency toggle.</p>}
               </div>
-              <input className="w-full border rounded-lg px-3 py-2 mb-3" placeholder="Enter Transaction ID (TID)"
+              <input className="w-full border rounded-lg px-3 py-2 mb-3" placeholder={paymentType === "binance_id" ? "Binance Pay Transaction ID" : paymentType === "binance" ? "Binance blockchain TxID" : "Enter Transaction ID (TID)"}
                 value={trx} onChange={(e) => setTrx(e.target.value)} />
               <button disabled={busy}
                 className="bg-[#1E3A8A] text-white px-6 py-2.5 rounded-lg font-semibold disabled:opacity-60">

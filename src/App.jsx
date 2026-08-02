@@ -42,6 +42,7 @@ import useMetaPixel from "./api/hooks/useMetaPixel";
 // Providers
 import { ProductsProvider } from "./context/ProductsContext";
 import { WhatsAppProvider } from "./context/WhatsAppContext";
+import { CurrencyProvider } from "./context/CurrencyContext";
 
 const RouteWrapper = ({ children }) => {
   const location = useLocation();
@@ -95,8 +96,9 @@ function MarketingLayout() {
 
 function App() {
   return (
-    <WhatsAppProvider>
-      <ProductsProvider>
+    <CurrencyProvider>
+      <WhatsAppProvider>
+        <ProductsProvider>
         <Router>
           <PixelTracker />
           <ScrollToTop />
@@ -114,8 +116,9 @@ function App() {
             <Route path="/*" element={<MarketingLayout />} />
           </Routes>
         </Router>
-      </ProductsProvider>
-    </WhatsAppProvider>
+        </ProductsProvider>
+      </WhatsAppProvider>
+    </CurrencyProvider>
   );
 }
 

@@ -2,8 +2,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Star, TrendingUp, Zap, Shield, Heart, ShoppingCart, Eye, Tag, Clock } from 'lucide-react';
+import { useCurrency } from '../../context/CurrencyContext';
 
 function ProductCard({ product, featured = false }) {
+  const { format } = useCurrency();
   const mainImage =
     product.images && product.images.length > 0
       ? product.images[0].image
@@ -167,21 +169,21 @@ function ProductCard({ product, featured = false }) {
                   {(() => {
                     const p = product.store_price ?? product.price;
                     return p !== null && p !== undefined && p !== ""
-                      ? `PKR ${Math.ceil(Number(p)).toLocaleString()}`
+                      ? format(p)
                       : "Contact for Price";
                   })()}
                 </span>
                 
                 {product.original_price && product.price < product.original_price && (
                   <span className="text-sm text-gray-500 line-through">
-                    PKR {product.original_price.toLocaleString()}
+                    {format(product.original_price)}
                   </span>
                 )}
               </div>
               
               {savings > 0 && (
                 <span className="text-xs text-[#FACC15] font-medium mt-0.5">
-                  Save PKR {savings.toLocaleString()}
+                  Save {format(savings)}
                 </span>
               )}
             </div>

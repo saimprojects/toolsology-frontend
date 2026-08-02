@@ -1,6 +1,7 @@
 // src/components/products/ProductFilters.jsx
 import React, { useState } from 'react';
 import { Filter, Tag, DollarSign, RefreshCw, Star, Check, TrendingUp, Zap, ChevronDown } from 'lucide-react';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const ProductFilters = ({
   categories,
@@ -12,6 +13,7 @@ const ProductFilters = ({
   productsCount,
   totalProducts
 }) => {
+  const { format } = useCurrency();
   const [localPriceRange, setLocalPriceRange] = useState(priceRange);
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isPriceOpen, setIsPriceOpen] = useState(true);
@@ -22,11 +24,11 @@ const ProductFilters = ({
   const [instantDelivery, setInstantDelivery] = useState(false);
 
   const priceRanges = [
-    { label: 'Under PKR 1,000', min: 0, max: 1000 },
-    { label: 'PKR 1,000 - PKR 2,000', min: 1000, max: 2000 },
-    { label: 'PKR 2,000 - PKR 5,000', min: 2000, max: 5000 },
-    { label: 'PKR 5,000 - PKR 10,000', min: 5000, max: 10000 },
-    { label: 'Over PKR 10,000', min: 10000, max: 50000 },
+    { label: `Under ${format(1000)}`, min: 0, max: 1000 },
+    { label: `${format(1000)} - ${format(2000)}`, min: 1000, max: 2000 },
+    { label: `${format(2000)} - ${format(5000)}`, min: 2000, max: 5000 },
+    { label: `${format(5000)} - ${format(10000)}`, min: 5000, max: 10000 },
+    { label: `Over ${format(10000)}`, min: 10000, max: 50000 },
   ];
 
   const handlePriceSubmit = () => {
@@ -167,7 +169,7 @@ const ProductFilters = ({
               <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-medium text-[#111827]">Custom Range</div>
                 <div className="text-sm text-[#1E3A8A] font-medium">
-                  PKR {localPriceRange[0].toLocaleString()} - PKR {localPriceRange[1].toLocaleString()}
+                  {format(localPriceRange[0])} - {format(localPriceRange[1])}
                 </div>
               </div>
 
@@ -194,8 +196,8 @@ const ProductFilters = ({
               </div>
 
               <div className="flex items-center justify-between mt-1 text-xs text-gray-600 mb-3">
-                <span>PKR 0</span>
-                <span>PKR 50,000</span>
+                <span>{format(0)}</span>
+                <span>{format(50000)}</span>
               </div>
 
               <button

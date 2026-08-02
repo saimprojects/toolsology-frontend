@@ -6,6 +6,7 @@ import {
   LogOut, Store, Menu, X,
 } from "lucide-react";
 import { isLoggedIn, clearTokens, getMe } from "../../api/reseller";
+import { CurrencyToggle, useCurrency } from "../../context/CurrencyContext";
 
 const links = [
   { to: "/reseller/app", label: "Overview", icon: LayoutDashboard, end: true },
@@ -15,6 +16,7 @@ const links = [
 ];
 
 export default function ResellerLayout() {
+  const { format } = useCurrency();
   const nav = useNavigate();
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,8 @@ export default function ResellerLayout() {
 
       <div className="px-5 py-4 border-b border-white/10">
         <div className="text-xs text-gray-400">Wallet balance</div>
-        <div className="text-xl font-bold text-white">Rs {me?.wallet_balance}</div>
+        <div className="text-xl font-bold text-white">{format(me?.wallet_balance)}</div>
+        <div className="mt-3"><CurrencyToggle dark /></div>
         <div className={`text-xs mt-1 ${me?.can_operate ? "text-green-400" : "text-yellow-400"}`}>
           {me?.can_operate ? "● Active" : "● Not activated"}
         </div>
@@ -97,7 +100,7 @@ export default function ResellerLayout() {
         <div className="lg:hidden flex items-center justify-between bg-white border-b px-4 py-3">
           <button onClick={() => setOpen(true)}><Menu className="w-6 h-6" /></button>
           <span className="font-semibold">Reseller Panel</span>
-          <span className="text-sm">Rs {me?.wallet_balance}</span>
+          <div className="flex items-center gap-2"><CurrencyToggle /><span className="text-sm">{format(me?.wallet_balance)}</span></div>
         </div>
 
         <main className="p-4 sm:p-6 max-w-5xl mx-auto">

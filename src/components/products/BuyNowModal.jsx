@@ -3,9 +3,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { X, CreditCard, MessageCircle, Zap } from "lucide-react";
 import { isLoggedIn } from "../../api/customer";
+import { useCurrency } from "../../context/CurrencyContext";
 
 export default function BuyNowModal({ open, onClose, product, offer, onWhatsApp }) {
   const nav = useNavigate();
+  const { currency, format } = useCurrency();
   if (!open) return null;
 
   function payInstant() {
@@ -29,7 +31,7 @@ export default function BuyNowModal({ open, onClose, product, offer, onWhatsApp 
         <h3 className="text-xl font-bold text-[#111827]">Complete your purchase</h3>
         <p className="text-gray-500 text-sm mb-1">{product.title}</p>
         {offer && (
-          <p className="text-[#1E3A8A] font-bold mb-5">PKR {offer.price} · {offer.label}</p>
+          <p className="text-[#1E3A8A] font-bold mb-5">{format(offer.price)} · {offer.label}</p>
         )}
 
         <button onClick={payInstant}
@@ -40,7 +42,7 @@ export default function BuyNowModal({ open, onClose, product, offer, onWhatsApp 
             </div>
             <div>
               <div className="font-semibold text-[#1E3A8A] flex items-center gap-1">
-                Pay with Bank Account <Zap className="w-4 h-4 text-[#FACC15]" />
+                {currency === "USD" ? "Pay with Binance" : "Pay with Bank Account"} <Zap className="w-4 h-4 text-[#FACC15]" />
               </div>
               <div className="text-xs text-gray-500">Online · Instant delivery · Account required</div>
             </div>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, LogOut, Copy, CheckCircle2 } from "lucide-react";
 import { isLoggedIn, clearTokens, getMe, getMyOrders } from "../api/customer";
+import { useCurrency } from "../context/CurrencyContext";
 
 const badge = {
   completed: "bg-green-100 text-green-700",
@@ -12,6 +13,7 @@ const badge = {
 };
 
 export default function CustomerAccount() {
+  const { format } = useCurrency();
   const nav = useNavigate();
   const [me, setMe] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -64,7 +66,7 @@ export default function CustomerAccount() {
               <div>
                 <div className="font-semibold text-[#111827]">{o.product_title}</div>
                 <div className="text-xs text-gray-500">
-                  Order #{o.id} · PKR {o.sell_amount_pkr} · {new Date(o.created_at).toLocaleString()}
+                  Order #{o.id} · {format(o.sell_amount_pkr)} · {new Date(o.created_at).toLocaleString()}
                 </div>
               </div>
               <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${badge[o.status] || ""}`}>

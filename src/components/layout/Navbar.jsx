@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, MessageCircle, ShoppingCart, Home, Package, Star, Users, Info, Store, LogIn, UserPlus, User, LogOut } from 'lucide-react';
 import { getWhatsAppNumber } from '../../api/api';
 import { isLoggedIn, clearTokens } from '../../api/customer';
+import { CurrencyToggle } from '../../context/CurrencyContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -129,6 +130,7 @@ const Navbar = () => {
 
           {/* Desktop Action Buttons — customer auth */}
           <div className="hidden lg:flex items-center space-x-3">
+            <CurrencyToggle />
             {isLoggedIn() ? (
               <>
                 <Link to="/account"
@@ -174,6 +176,7 @@ const Navbar = () => {
         {isOpen && (
           <div className="lg:hidden mt-4 pb-4 border-t border-[#D1D5DB] pt-4">
             <div className="flex flex-col space-y-3">
+              <div className="px-4"><CurrencyToggle /></div>
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 return (

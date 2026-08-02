@@ -23,10 +23,12 @@ import ProductCard from '../components/products/ProductCard';
 import BuyNowModal from '../components/products/BuyNowModal';
 import { getProductById } from '../api/api';
 import { getRetailOffers } from '../api/customer';
+import { useCurrency } from '../context/CurrencyContext';
 import { useProducts } from '../api/hooks/useProducts';
 import { useWhatsApp } from '../context/WhatsAppContext';
 
 const ProductDetail = () => {
+  const { format } = useCurrency();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -200,7 +202,7 @@ const ProductDetail = () => {
     }
 
     const offerLine = selectedOffer
-      ? `📋 *Option:* ${selectedOffer.label}\n💰 *Price:* PKR ${selectedOffer.price}`
+      ? `📋 *Option:* ${selectedOffer.label}\n💰 *Price:* ${format(selectedOffer.price)}`
       : '';
 
     const message = `🛒 *ORDER REQUEST - TOOLSOLOGY* 🛒
@@ -287,10 +289,10 @@ I have a question about this tool. Please provide more details.`;
     switch (plan.durationType) {
       case 'daily':
         const dailyRate = (price / plan.durationValue).toFixed(2);
-        return `≈ PKR ${dailyRate} / day`;
+        return `≈ ${format(dailyRate)} / day`;
       case 'yearly':
         const yearlyRate = (price / plan.durationValue).toFixed(2);
-        return `≈ PKR ${yearlyRate} / year`;
+        return `≈ ${format(yearlyRate)} / year`;
       default:
         return '';
     }
@@ -472,7 +474,7 @@ I have a question about this tool. Please provide more details.`;
                               {o.in_stock ? 'In stock' : 'Out of stock'}
                             </div>
                           </div>
-                          <div className="text-lg font-bold text-[#1E3A8A]">PKR {o.price}</div>
+                          <div className="text-lg font-bold text-[#1E3A8A]">{format(o.price)}</div>
                         </div>
 
                         {o.short_description && (
@@ -503,7 +505,7 @@ I have a question about this tool. Please provide more details.`;
                   className="w-full mt-5 bg-[#1E3A8A] text-white py-3 rounded-lg font-bold hover:bg-[#1E3A8A]/90 hover:shadow-lg transition-all flex items-center justify-center"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  Buy Now - PKR {selectedOffer.price}
+                  Buy Now - {format(selectedOffer.price)}
                 </button>
               )}
               <div className="flex items-center justify-center mt-3 text-xs text-gray-500">
@@ -577,7 +579,7 @@ I have a question about this tool. Please provide more details.`;
                             <div className="bg-gray-50 p-3 rounded-lg mb-3">
                               <div className="flex items-baseline justify-between">
                                 <div>
-                                  <span className="text-2xl font-bold text-[#111827]">PKR {plan.price}</span>
+                                  <span className="text-2xl font-bold text-[#111827]">{format(plan.price)}</span>
                                   <span className="text-gray-500 ml-2">
                                     / {plan.displayDuration}
                                   </span>
@@ -626,7 +628,7 @@ I have a question about this tool. Please provide more details.`;
                         <p className="text-sm text-gray-500">{getPlanDescription(selectedPlan)}</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-[#111827]">PKR {selectedPlan.price}</div>
+                        <div className="text-xl font-bold text-[#111827]">{format(selectedPlan.price)}</div>
                         <div className="text-sm text-gray-500">
                           {selectedPlan.displayDuration} access
                         </div>
@@ -643,7 +645,7 @@ I have a question about this tool. Please provide more details.`;
                       className="w-full bg-[#1E3A8A] text-white py-3 rounded-lg font-bold hover:bg-[#1E3A8A]/90 hover:shadow-lg transition-all flex items-center justify-center"
                     >
                       <ShoppingCart className="w-5 h-5 mr-2" />
-                      Buy Now - PKR {selectedPlan.price}
+                      Buy Now - {format(selectedPlan.price)}
                     </button>
                     
                     <div className="flex items-center justify-center mt-3 text-xs text-gray-500">

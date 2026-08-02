@@ -2,8 +2,10 @@
 import React from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { clearTokens } from "../../api/reseller";
+import { useCurrency } from "../../context/CurrencyContext";
 
 export default function Settings() {
+  const { format } = useCurrency();
   const { me } = useOutletContext();
   const nav = useNavigate();
 
@@ -29,8 +31,8 @@ export default function Settings() {
 
       <div className="bg-white border rounded-xl p-5 mb-6">
         <h2 className="font-semibold mb-2">Wallet</h2>
-        <Row label="Balance" value={`Rs ${me?.wallet_balance}`} />
-        <Row label="Minimum deposit" value={`Rs ${me?.min_deposit}`} />
+        <Row label="Balance" value={format(me?.wallet_balance)} />
+        <Row label="Minimum deposit" value={format(me?.min_deposit)} />
         <Row label="Payment mode"
           value={me?.wallet_required ? "Wallet required" : "Wallet or account"} />
       </div>

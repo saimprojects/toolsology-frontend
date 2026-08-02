@@ -53,11 +53,11 @@ export async function getRetailOffers(productId) {
 }
 
 // Instant bank checkout (logged-in) — buys the CHOSEN offer.
-export function retailCheckout({ product_id, offer_id, quantity = 1, trx_id, customer_email = "", slot_months = null }) {
+export function retailCheckout({ product_id, offer_id, quantity = 1, trx_id, customer_email = "", slot_months = null, payment_type = "local" }) {
   return req("/api/payments/checkout/retail/", {
     method: "POST",
     auth: true,
-    body: { product_id, offer_id, quantity, trx_id, customer_email, slot_months, idempotency_key: genKey() },
+    body: { product_id, offer_id, quantity, trx_id, customer_email, slot_months, payment_type, idempotency_key: genKey() },
   });
 }
 
@@ -77,3 +77,4 @@ export async function getPaymentMethods() {
   const data = await req("/api/payments/methods/");
   return data?.results || data || [];
 }
+export function getBinanceConfig() { return req("/api/payments/binance/config/"); }
