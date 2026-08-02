@@ -1,9 +1,9 @@
 // src/pages/CheckoutPage.jsx — retail instant-pay checkout (login required)
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ShieldCheck, Copy, CheckCircle2, ArrowRight } from "lucide-react";
+import { ShieldCheck, Copy, CheckCircle2, ArrowRight, Tag, X } from "lucide-react";
 import {
-  isLoggedIn, getProduct, getRetailOffers, getPaymentMethods, getBinanceConfig, retailCheckout,
+  isLoggedIn, getProduct, getRetailOffers, getPaymentMethods, getBinanceConfig, retailCheckout, previewPromo,
 } from "../api/customer";
 import { useCurrency } from "../context/CurrencyContext";
 import GearLoader from "../components/layout/GearLoader";
@@ -36,6 +36,11 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState("");
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState("");
+  const [promoBusy, setPromoBusy] = useState(false);
+  const payablePrice = appliedPromo?.payable_price ?? offer?.price;
 
   useEffect(() => {
     if (!isLoggedIn()) { nav(`/login?next=${encodeURIComponent(`/checkout/${productId}?offer=${offerId}`)}`); return; }
@@ -61,10 +66,22 @@ export default function CheckoutPage() {
       const data = await retailCheckout({
         product_id: productId, offer_id: offer.offer_id, quantity: 1,
         trx_id: trx.trim(), customer_email: email.trim(), payment_type: paymentType,
+        promo_code: appliedPromo?.code || "",
       });
       setResult(data);
     } catch (err) { setError(err.message); }
     finally { setSubmitting(false); }
+  }
+
+  async function applyPromo() {
+    setPromoError("");
+    if (!promoInput.trim() || !offer) { setPromoError("Enter a promo code first."); return; }
+    setPromoBusy(true);
+    try {
+      const data = await previewPromo({ product_id: productId, offer_id: offer.offer_id, promo_code: promoInput.trim() });
+      setAppliedPromo(data); setPromoInput(data.code);
+    } catch (err) { setAppliedPromo(null); setPromoError(err.message); }
+    finally { setPromoBusy(false); }
   }
 
   function copy(text, key) {
@@ -83,7 +100,7 @@ export default function CheckoutPage() {
       <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Complete your purchase</h1>
       <p className="text-zinc-400 mb-8">
         {product.title}{offer ? ` · ${offer.label}` : ""} —{" "}
-        <span className="font-bold text-white">{format(offer?.price)}</span>
+        <span className="font-bold text-white">{format(payablePrice)}</span>
       </p>
 
       {/* Success */}
@@ -136,6 +153,19 @@ export default function CheckoutPage() {
 
       {!result && (
         <div className="bg-white text-black border border-zinc-200 rounded-[2rem] p-6 sm:p-8 shadow-2xl shadow-white/5">
+          <div className="mb-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+            <div className="mb-3 flex items-center gap-2 font-bold"><Tag className="h-4 w-4" /> Promo code</div>
+            {appliedPromo ? (
+              <div className="flex items-center justify-between rounded-xl bg-black p-4 text-white">
+                <div><div className="text-xs text-zinc-400">Applied</div><div className="font-bold tracking-wider">{appliedPromo.code}</div><div className="mt-1 text-sm"><span className="text-zinc-500 line-through">{format(appliedPromo.regular_price)}</span><span className="ml-2 font-bold">{format(appliedPromo.payable_price)}</span></div></div>
+                <button type="button" onClick={() => { setAppliedPromo(null); setPromoInput(""); setPromoError(""); }} className="rounded-full bg-white/10 p-2 hover:bg-white/20" aria-label="Remove promo"><X className="h-4 w-4" /></button>
+              </div>
+            ) : (
+              <div className="flex gap-2"><input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } }} className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-4 py-3 font-semibold uppercase tracking-wider outline-none focus:border-black" placeholder="ENTER CODE" /><button type="button" disabled={promoBusy} onClick={applyPromo} className="min-w-24 rounded-xl bg-black px-4 font-bold text-white disabled:opacity-60">{promoBusy ? <GearLoader size="sm" /> : "Apply"}</button></div>
+            )}
+            {promoError && <p className="mt-2 text-sm text-red-600">{promoError}</p>}
+            <p className="mt-2 text-xs text-zinc-500">Calculated from platform cost plus the code's admin-defined markup.</p>
+          </div>
           <div className="mb-5 rounded-lg bg-gray-50 border p-3 text-sm">
             {paymentType !== "local" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}
           </div>
@@ -163,7 +193,7 @@ export default function CheckoutPage() {
             {paymentType === "binance" && binance.wallet_enabled && (
               <div className="border border-yellow-300 bg-yellow-50 rounded-lg p-4 text-sm space-y-1">
                 <div className="font-bold">Binance deposit</div>
-                <div>Send exactly <b>{(Math.ceil((Number(offer?.price || 0) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b></div>
+                <div>Send exactly <b>{(Math.ceil((Number(payablePrice || 0) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b></div>
                 <div>Network: <b>{binance.network}</b></div>
                 <div className="font-mono break-all">{binance.address}</div>
                 <button type="button" onClick={() => copy(binance.address, "binance-address")} className="text-[#1E3A8A] font-semibold">
@@ -175,7 +205,7 @@ export default function CheckoutPage() {
             {paymentType === "binance_id" && binance.pay_id_enabled && (
               <div className="border border-yellow-300 bg-yellow-50 rounded-lg p-4 text-sm space-y-1">
                 <div className="font-bold">Binance ID transfer</div>
-                <div>Send exactly <b>{(Math.ceil((Number(offer?.price || 0) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b></div>
+                <div>Send exactly <b>{(Math.ceil((Number(payablePrice || 0) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b></div>
                 <div>Binance ID: <b className="font-mono">{binance.pay_id}</b></div>
                 <button type="button" onClick={() => copy(binance.pay_id, "binance-pay-id")} className="text-[#1E3A8A] font-semibold">{copied === "binance-pay-id" ? "Copied!" : "Copy Binance ID"}</button>
                 <p className="text-xs text-gray-600 pt-1">After payment, copy the Transaction ID from Binance Pay history and enter it below.</p>
@@ -194,7 +224,7 @@ export default function CheckoutPage() {
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button disabled={submitting}
               className="w-full bg-black text-white rounded-xl py-3.5 font-bold hover:bg-zinc-800 disabled:opacity-60">
-              {submitting ? <GearLoader size="sm" label="Verifying payment" /> : `Verify & get instantly — ${format(offer?.price)}`}
+              {submitting ? <GearLoader size="sm" label="Verifying payment" /> : `Verify & get instantly — ${format(payablePrice)}`}
             </button>
             <div className="flex items-center justify-center text-xs text-gray-500 gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-[#1E3A8A]" /> Just paid? If it says “not found yet”, wait a few seconds and retry.

@@ -53,11 +53,17 @@ export async function getRetailOffers(productId) {
 }
 
 // Instant bank checkout (logged-in) — buys the CHOSEN offer.
-export function retailCheckout({ product_id, offer_id, quantity = 1, trx_id, customer_email = "", slot_months = null, payment_type = "local" }) {
+export function retailCheckout({ product_id, offer_id, quantity = 1, trx_id, customer_email = "", slot_months = null, payment_type = "local", promo_code = "" }) {
   return req("/api/payments/checkout/retail/", {
     method: "POST",
     auth: true,
-    body: { product_id, offer_id, quantity, trx_id, customer_email, slot_months, payment_type, idempotency_key: genKey() },
+    body: { product_id, offer_id, quantity, trx_id, customer_email, slot_months, payment_type, promo_code, idempotency_key: genKey() },
+  });
+}
+
+export function previewPromo({ product_id, offer_id, promo_code }) {
+  return req("/api/payments/promo/preview/", {
+    method: "POST", auth: true, body: { product_id, offer_id, promo_code },
   });
 }
 
