@@ -14,13 +14,18 @@ export default function CheckoutPage() {
   const [params] = useSearchParams();
   const productId = Number(id);
   const offerId = params.get("offer");
+  const requestedPayment = params.get("payment");
 
   const [product, setProduct] = useState(null);
   const [offer, setOffer] = useState(null);
   const [methods, setMethods] = useState([]);
   const [binance, setBinance] = useState({ enabled: false });
   const [binanceMode, setBinanceMode] = useState("binance");
-  const paymentType = currency === "USD" ? binanceMode : "local";
+  const paymentType = requestedPayment === "local"
+    ? "local"
+    : requestedPayment === "binance"
+      ? binanceMode
+      : currency === "USD" ? binanceMode : "local";
   const [loading, setLoading] = useState(true);
 
   const [trx, setTrx] = useState("");
@@ -47,7 +52,7 @@ export default function CheckoutPage() {
     e.preventDefault();
     setError(""); setResult(null);
     if (!offer) { setError("No plan selected."); return; }
-    if (currency === "USD" && !binance.enabled) { setError("Binance payment is not available right now. Please select PKR."); return; }
+    if (paymentType !== "local" && !binance.enabled) { setError("Binance payment is not available right now. Please select PKR."); return; }
     if (!trx.trim()) { setError("Please enter your Transaction ID (TID)."); return; }
     setSubmitting(true);
     try {
@@ -127,9 +132,9 @@ export default function CheckoutPage() {
       {!result && (
         <div className="bg-white border rounded-2xl p-6 shadow-sm">
           <div className="mb-5 rounded-lg bg-gray-50 border p-3 text-sm">
-            {currency === "USD" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}
+            {paymentType !== "local" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}
           </div>
-          {currency === "USD" && binance.wallet_enabled && binance.pay_id_enabled && (
+          {paymentType !== "local" && binance.wallet_enabled && binance.pay_id_enabled && (
             <div className="grid grid-cols-2 gap-2 mb-5">
               <button type="button" onClick={() => { setBinanceMode("binance"); setTrx(""); }} className={`rounded-lg border-2 p-3 text-sm font-semibold ${binanceMode === "binance" ? "border-yellow-500 bg-yellow-50" : "border-gray-200"}`}>Wallet address</button>
               <button type="button" onClick={() => { setBinanceMode("binance_id"); setTrx(""); }} className={`rounded-lg border-2 p-3 text-sm font-semibold ${binanceMode === "binance_id" ? "border-yellow-500 bg-yellow-50" : "border-gray-200"}`}>Binance ID</button>
@@ -171,7 +176,7 @@ export default function CheckoutPage() {
                 <p className="text-xs text-gray-600 pt-1">After payment, copy the Transaction ID from Binance Pay history and enter it below.</p>
               </div>
             )}
-            {currency === "USD" && !binance.enabled && <p className="text-red-600 text-sm">Binance payment is currently unavailable. Select PKR from the navbar.</p>}
+            {paymentType !== "local" && !binance.enabled && <p className="text-red-600 text-sm">Binance payment is currently unavailable. Select PKR from the navbar.</p>}
           </div>
 
           {/* Step 2 */}
