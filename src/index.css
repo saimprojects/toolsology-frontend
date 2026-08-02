@@ -21,6 +21,22 @@ html { background: #000; }
 body { margin: 0; background: #000; color: #09090b; font-feature-settings: "ss01", "cv11"; }
 ::selection { background: #000; color: #fff; }
 
+/* Compatibility bridge for older components while the site uses one visual
+   language: black actions, neutral surfaces and white highlights. */
+[class~="bg-[#1E3A8A]"] { background-color: #000 !important; }
+[class~="hover:bg-[#1E3A8A]"]:hover { background-color: #18181b !important; }
+[class~="text-[#1E3A8A]"] { color: #18181b !important; }
+[class~="border-[#1E3A8A]"] { border-color: #18181b !important; }
+[class~="from-[#1E3A8A]"] { --tw-gradient-from: #000 var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position) !important; }
+[class~="to-[#2D4A9C]"] { --tw-gradient-to: #27272a var(--tw-gradient-to-position) !important; }
+[class~="bg-[#FACC15]"] { background-color: #fff !important; }
+[class~="text-[#FACC15]"] { color: #52525b !important; }
+[class~="bg-[#F3F4F6]"] { background-color: #f4f4f5 !important; }
+
+footer { background: #09090b !important; border-top: 1px solid #27272a; }
+footer [class~="text-[#1E3A8A]"], footer [class~="text-[#FACC15]"] { color: #fff !important; }
+footer [class~="bg-[#1E3A8A]"] { background-color: #fff !important; color: #000 !important; }
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -91,8 +107,8 @@ body { margin: 0; background: #000; color: #09090b; font-feature-settings: "ss01
 /* Add to src/index.css */
 .bg-grid-pattern {
   background-image: 
-    linear-gradient(to right, #8B5CF6 1px, transparent 1px),
-    linear-gradient(to bottom, #8B5CF6 1px, transparent 1px);
+    linear-gradient(to right, #27272a 1px, transparent 1px),
+    linear-gradient(to bottom, #27272a 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
@@ -105,7 +121,7 @@ body { margin: 0; background: #000; color: #09090b; font-feature-settings: "ss01
   content: '';
   position: absolute;
   inset: -2px;
-  background: linear-gradient(45deg, #6B21A8, #8B5CF6, #F59E0B);
+  background: linear-gradient(45deg, #18181b, #71717a, #ffffff);
   border-radius: inherit;
   z-index: -1;
   opacity: 0;
@@ -118,7 +134,7 @@ body { margin: 0; background: #000; color: #09090b; font-feature-settings: "ss01
 
 /* Custom gradients */
 .text-gradient {
-  background: linear-gradient(135deg, #6B21A8 0%, #8B5CF6 50%, #F59E0B 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 50%, #52525b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

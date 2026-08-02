@@ -22,25 +22,25 @@ function ProductCard({ product, featured = false }) {
     : 0;
 
   return (
-    <div className="group relative bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg border border-[#D1D5DB] hover:border-[#1E3A8A]">
+    <article className="group relative overflow-hidden rounded-3xl border border-zinc-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-black hover:shadow-2xl">
       {/* Badges Container */}
       <div className="absolute top-3 left-3 z-10 space-y-2">
         {isOnSale && (
-          <div className="bg-[#FACC15] text-[#111827] text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5">
+          <div className="bg-white text-black text-xs font-bold px-3 py-1.5 rounded-full border border-zinc-200 shadow-lg flex items-center gap-1.5">
             <Tag className="w-3 h-3" />
             {discountPercentage}% OFF
           </div>
         )}
         
         {isFeatured && (
-          <div className="bg-[#1E3A8A] text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5">
+          <div className="bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
             <Star className="w-3 h-3 fill-current" />
             Featured
           </div>
         )}
         
         {isTrending && (
-          <div className="bg-gradient-to-r from-[#1E3A8A] to-[#2D4A9C] text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5">
+          <div className="bg-black text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
             <TrendingUp className="w-3 h-3" />
             Trending
           </div>
@@ -98,7 +98,7 @@ function ProductCard({ product, featured = false }) {
               <Link
                 key={cat.id}
                 to={`/category/${cat.slug || cat.id}`}
-                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#1E3A8A]/10 text-[#1E3A8A] hover:bg-[#1E3A8A]/20 transition-colors"
+                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-black hover:bg-zinc-200 transition-colors"
               >
                 {cat.name}
               </Link>
@@ -113,7 +113,7 @@ function ProductCard({ product, featured = false }) {
 
         {/* Title */}
         <Link to={`/product/${product.slug || product.id}`}>
-          <h3 className="text-base font-bold text-[#111827] mb-2 line-clamp-2 hover:text-[#1E3A8A] transition-colors leading-tight">
+          <h3 className="text-base font-bold text-black mb-2 line-clamp-2 transition-colors leading-tight">
             {product.title}
           </h3>
         </Link>
@@ -149,12 +149,12 @@ function ProductCard({ product, featured = false }) {
         {/* Features */}
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="flex items-center text-xs text-gray-600">
-            <Clock className="w-3 h-3 mr-1.5 text-[#1E3A8A] flex-shrink-0" />
+            <Clock className="w-3 h-3 mr-1.5 text-black flex-shrink-0" />
             <span className="truncate">Instant Delivery</span>
           </div>
           
           <div className="flex items-center text-xs text-gray-600">
-            <Shield className="w-3 h-3 mr-1.5 text-[#1E3A8A] flex-shrink-0" />
+            <Shield className="w-3 h-3 mr-1.5 text-black flex-shrink-0" />
             <span className="truncate">Genuine License</span>
           </div>
         </div>
@@ -201,7 +201,7 @@ function ProductCard({ product, featured = false }) {
           <div className="flex gap-2">
             <Link
               to={`/product/${product.slug || product.id}`}
-              className="flex-1 bg-[#1E3A8A] text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-[#1E3A8A]/90 transition-all duration-300 flex items-center justify-center gap-2"
+              className="flex-1 bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-zinc-800 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <ShoppingCart className="w-4 h-4" />
               View Details
@@ -224,7 +224,7 @@ function ProductCard({ product, featured = false }) {
           </div>
         </div>
       )}
-    </div>
+    </article>
   );
 }
 

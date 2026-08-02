@@ -85,7 +85,7 @@ const Testimonials = () => {
   };
 
   return (
-    <section className="py-20 bg-[#F3F4F6]">
+    <section className="border-y border-zinc-800 bg-black py-20 text-white">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -94,11 +94,11 @@ const Testimonials = () => {
             <span className="text-sm font-medium text-[#111827]">Happy Customers</span>
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold text-[#111827] mb-6">
-            Trusted By <span className="text-[#1E3A8A]">Thousands</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Trusted by thousands.
           </h2>
           
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-zinc-400">
             See what our customers say about their experience with Toolsology
           </p>
         </div>
