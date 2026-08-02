@@ -1,6 +1,6 @@
 // src/pages/ProductDetail.jsx
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Star,
   ChevronRight,
@@ -26,10 +26,12 @@ import { getRetailOffers } from '../api/customer';
 import { useCurrency } from '../context/CurrencyContext';
 import { useProducts } from '../api/hooks/useProducts';
 import { useWhatsApp } from '../context/WhatsAppContext';
+import Seo from '../components/layout/Seo';
 
 const ProductDetail = () => {
   const { format } = useCurrency();
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,9 +44,10 @@ const ProductDetail = () => {
   const [expandedOffer, setExpandedOffer] = useState(null);
 
   useEffect(() => {
+    if (!product?.id) return;
     let alive = true;
     setOffersLoading(true);
-    getRetailOffers(id)
+    getRetailOffers(product.id)
       .then((data) => {
         if (!alive) return;
         setOffers(data);
@@ -52,7 +55,7 @@ const ProductDetail = () => {
       })
       .finally(() => alive && setOffersLoading(false));
     return () => { alive = false; };
-  }, [id]);
+  }, [product?.id]);
 
   const { whatsappNumber, loading: loadingWhatsapp } = useWhatsApp();
   const { products: allProducts } = useProducts();
@@ -187,6 +190,9 @@ const ProductDetail = () => {
       }
       
       setProduct(data);
+      if (/^\d+$/.test(String(id)) && data.slug) {
+        navigate(`/product/${data.slug}`, { replace: true });
+      }
     } catch (err) {
       console.error('❌ Error fetching product:', err);
       setError(err.message || 'Product not found');
@@ -308,6 +314,15 @@ I have a question about this tool. Please provide more details.`;
     }
   };
 
+  const productSchema = useMemo(() => product ? ({
+    "@context": "https://schema.org", "@type": "Product", name: product.title,
+    description: product.meta_description || product.title,
+    image: product.main_image || product.images?.[0]?.image,
+    url: `https://www.toolsology.shop/product/${product.slug || product.id}`,
+    brand: { "@type": "Brand", name: "Toolsology" },
+    offers: selectedOffer ? { "@type": "Offer", priceCurrency: "PKR", price: selectedOffer.price, availability: selectedOffer.in_stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", url: `https://www.toolsology.shop/product/${product.slug || product.id}` } : undefined,
+  }) : null, [product, selectedOffer]);
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-20">
@@ -359,10 +374,11 @@ I have a question about this tool. Please provide more details.`;
   }
 
   return (
-    <div className="bg-[#F3F4F6]">
+    <div className="min-h-screen bg-black text-white pb-20">
+      <Seo title={product.seo_title || `${product.title} Subscription`} description={product.meta_description || `Buy ${product.title} from Toolsology with secure payment, instant digital delivery and customer support.`} path={`/product/${product.slug || product.id}`} image={product.main_image} type="product" schema={productSchema} />
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 pt-8">
-        <nav className="flex items-center text-sm text-gray-600 mb-8">
+        <nav className="flex items-center text-sm text-zinc-400 mb-8">
           <Link to="/" className="hover:text-[#1E3A8A]">Home</Link>
           <ChevronRight className="w-4 h-4 mx-2" />
           <Link to="/products" className="hover:text-[#1E3A8A]">Premium Tools</Link>
@@ -391,7 +407,7 @@ I have a question about this tool. Please provide more details.`;
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-6 rounded-[2rem] bg-white p-6 text-black shadow-2xl shadow-white/5 sm:p-8">
             {/* Categories & Badges */}
             <div className="flex flex-wrap gap-2">
               {product.categories?.map(category => (
@@ -444,7 +460,7 @@ I have a question about this tool. Please provide more details.`;
             </div>
 
             {/* Offers (attached bot products — bot names hidden) */}
-            <div className="bg-white rounded-xl border border-[#D1D5DB] p-6">
+            <div className="bg-zinc-50 rounded-2xl border border-zinc-200 p-6">
               <h3 className="text-xl font-bold text-[#111827] mb-4">Choose an option</h3>
               {offersLoading ? (
                 <p className="text-gray-500">Loading options…</p>
@@ -461,7 +477,7 @@ I have a question about this tool. Please provide more details.`;
                       <div
                         key={o.offer_id}
                         className={`rounded-xl border-2 p-4 transition ${
-                          isSel ? 'border-[#1E3A8A] bg-[#1E3A8A]/5' : 'border-[#D1D5DB] hover:border-[#1E3A8A]/50'
+                          isSel ? 'border-black bg-white' : 'border-zinc-200 hover:border-zinc-500'
                         } ${o.in_stock ? '' : 'opacity-50'}`}
                       >
                         <div
@@ -474,7 +490,7 @@ I have a question about this tool. Please provide more details.`;
                               {o.in_stock ? 'In stock' : 'Out of stock'}
                             </div>
                           </div>
-                          <div className="text-lg font-bold text-[#1E3A8A]">{format(o.price)}</div>
+                          <div className="text-lg font-bold text-black">{format(o.price)}</div>
                         </div>
 
                         {o.short_description && (
@@ -502,7 +518,7 @@ I have a question about this tool. Please provide more details.`;
               {selectedOffer && (
                 <button
                   onClick={() => setShowBuy(true)}
-                  className="w-full mt-5 bg-[#1E3A8A] text-white py-3 rounded-lg font-bold hover:bg-[#1E3A8A]/90 hover:shadow-lg transition-all flex items-center justify-center"
+                  className="w-full mt-5 bg-black text-white py-3.5 rounded-xl font-bold hover:bg-zinc-800 hover:shadow-lg transition-all flex items-center justify-center"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Buy Now - {format(selectedOffer.price)}

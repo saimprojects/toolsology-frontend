@@ -1,8 +1,8 @@
 // src/api/reseller.js
 // Reseller-panel API calls with JWT token handling.
 
-const RAW = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/";
-const BASE = RAW.endsWith("/") ? RAW.slice(0, -1) : RAW;
+const RAW = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : "http://127.0.0.1:8000/");
+const BASE = (RAW.endsWith("/") ? RAW.slice(0, -1) : RAW).replace(/\/api$/, "");
 
 const ACCESS_KEY = "reseller_access";
 const REFRESH_KEY = "reseller_refresh";
@@ -115,3 +115,6 @@ export async function getPaymentMethods() {
   return data?.results || data || [];
 }
 export function getBinanceConfig() { return req("/api/payments/binance/config/"); }
+export function getDeveloperKeys() { return req("/api/reseller/developer/keys/", { auth: true }); }
+export function createDeveloperKey(name) { return req("/api/reseller/developer/keys/", { method: "POST", auth: true, body: { name } }); }
+export function revokeDeveloperKey(id) { return req(`/api/reseller/developer/keys/${id}/`, { method: "DELETE", auth: true }); }

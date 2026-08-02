@@ -1,21 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
 /* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 :root {
-  --brand-purple: #6B21A8;
-  --brand-purple-light: #8B5CF6;
-  --brand-yellow: #F59E0B;
-  --brand-black: #111827;
+  --brand-purple: #000000;
+  --brand-purple-light: #18181b;
+  --brand-yellow: #ffffff;
+  --brand-black: #000000;
   --brand-white: #FFFFFF;
 }
 
 * {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
 }
+
+html { background: #000; }
+body { margin: 0; background: #000; color: #09090b; font-feature-settings: "ss01", "cv11"; }
+::selection { background: #000; color: #fff; }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -23,11 +27,11 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #09090b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--brand-purple);
+  background: #52525b;
   border-radius: 5px;
 }
 

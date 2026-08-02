@@ -29,6 +29,8 @@ import ResellerLogin from "./pages/ResellerLogin";
 import CustomerLogin from "./pages/CustomerLogin";
 import CustomerSignup from "./pages/CustomerSignup";
 import CustomerAccount from "./pages/CustomerAccount";
+import BlogPage from "./pages/BlogPage";
+import BlogDetail from "./pages/BlogDetail";
 
 // Reseller panel (own layout)
 import ResellerLayout from "./components/reseller/ResellerLayout";
@@ -37,6 +39,7 @@ import ResellerProducts from "./pages/reseller/Products";
 import ResellerProductDetail from "./pages/reseller/ProductDetail";
 import ResellerOrders from "./pages/reseller/Orders";
 import ResellerSettings from "./pages/reseller/Settings";
+import ResellerDeveloper from "./pages/reseller/Developer";
 
 import useMetaPixel from "./api/hooks/useMetaPixel";
 // Providers
@@ -60,7 +63,7 @@ function PixelTracker() {
 // Public marketing site (with navbar/footer/WhatsApp)
 function MarketingLayout() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col">
       <Navbar />
       <main className="flex-grow">
         <React.Suspense fallback={<LoadingSpinner fullScreen />}>
@@ -79,6 +82,8 @@ function MarketingLayout() {
               <Route path="/login" element={<CustomerLogin />} />
               <Route path="/signup" element={<CustomerSignup />} />
               <Route path="/account" element={<CustomerAccount />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogDetail />} />
               {/* Reseller public pages */}
               <Route path="/reseller" element={<ResellerPanel />} />
               <Route path="/reseller/signup" element={<ResellerSignup />} />
@@ -110,6 +115,7 @@ function App() {
               <Route path="products/:id" element={<ResellerProductDetail />} />
               <Route path="orders" element={<ResellerOrders />} />
               <Route path="settings" element={<ResellerSettings />} />
+              <Route path="developer" element={<ResellerDeveloper />} />
             </Route>
 
             {/* Everything else — public marketing site */}

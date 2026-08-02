@@ -1,7 +1,7 @@
 // src/api/customer.js — customer (retail) auth + checkout with JWT.
 
-const RAW = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/";
-const BASE = RAW.endsWith("/") ? RAW.slice(0, -1) : RAW;
+const RAW = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : "http://127.0.0.1:8000/");
+const BASE = (RAW.endsWith("/") ? RAW.slice(0, -1) : RAW).replace(/\/api$/, "");
 
 const ACCESS = "customer_access";
 const REFRESH = "customer_refresh";

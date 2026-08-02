@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Package, LogOut, Copy, CheckCircle2 } from "lucide-react";
 import { isLoggedIn, clearTokens, getMe, getMyOrders } from "../api/customer";
 import { useCurrency } from "../context/CurrencyContext";
+import Seo from "../components/layout/Seo";
 
 const badge = {
   completed: "bg-green-100 text-green-700",
@@ -34,34 +35,36 @@ export default function CustomerAccount() {
     setCopied(key); setTimeout(() => setCopied(""), 1500);
   }
 
-  if (loading) return <div className="container mx-auto px-4 py-20 text-center">Loading…</div>;
+  if (loading) return <div className="min-h-screen bg-black px-4 py-20 text-center text-white">Loading...</div>;
 
   return (
-    <div className="container mx-auto px-4 py-10 max-w-3xl">
+    <div className="min-h-screen bg-black px-4 py-12 text-white">
+      <Seo title="My Account" description="Manage your Toolsology orders and delivered accounts." noindex />
+      <div className="mx-auto max-w-4xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#111827]">My Account</h1>
-          <p className="text-gray-500">Hi {me?.username} — your orders & credentials</p>
+          <h1 className="text-4xl font-bold tracking-tight text-white">My Account</h1>
+          <p className="text-zinc-400">Hi {me?.username} — your orders and credentials</p>
         </div>
         <button onClick={logout}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600">
+          className="flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:border-white hover:text-white">
           <LogOut className="w-4 h-4" /> Logout
         </button>
       </div>
 
       <h2 className="font-semibold text-lg mb-3 flex items-center gap-2">
-        <Package className="w-5 h-5 text-[#1E3A8A]" /> Order history
+        <Package className="w-5 h-5 text-white" /> Order history
       </h2>
 
       {orders.length === 0 && (
-        <div className="bg-white border rounded-xl p-8 text-center text-gray-500">
+        <div className="bg-white border border-zinc-200 rounded-2xl p-8 text-center text-zinc-500">
           No orders yet. Your purchases will appear here.
         </div>
       )}
 
       <div className="space-y-4">
         {orders.map((o) => (
-          <div key={o.id} className="bg-white border rounded-xl p-5">
+          <div key={o.id} className="bg-white text-black border border-zinc-200 rounded-2xl p-5 shadow-xl shadow-black/20">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <div className="font-semibold text-[#111827]">{o.product_title}</div>
@@ -112,6 +115,7 @@ export default function CustomerAccount() {
             )}
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

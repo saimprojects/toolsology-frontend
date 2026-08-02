@@ -6,6 +6,7 @@ import ProductFilters from '../components/products/ProductFilters';
 import { getAllProducts, getCategories } from '../api/api';
 import { Filter, Grid, List, Search, Sliders, ChevronDown, Loader, ShoppingCart, Tag, TrendingUp, Zap } from 'lucide-react';
 import { useCurrency } from '../context/CurrencyContext';
+import Seo from '../components/layout/Seo';
 
 const ProductsPage = () => {
   const { format } = useCurrency();
@@ -146,8 +147,8 @@ const ProductsPage = () => {
     setVisibleCount(prev => prev + 12);
   };
 
-  const handleViewDetails = (productId) => {
-    navigate(`/product/${productId}`);
+  const handleViewDetails = (product) => {
+    navigate(`/product/${product.slug || product.id}`);
   };
 
   // Get currently visible products
@@ -180,20 +181,20 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6]">
+    <div className="min-h-screen bg-black text-white">
+      <Seo title="Premium Digital Tools, AI & Software Subscriptions" description="Browse premium digital tools, AI subscriptions, VPNs and software with instant delivery in Pakistan. Retail and reseller prices available." path="/products" />
       {/* Hero Header */}
-      <div className="bg-gradient-to-r from-[#1E3A8A] to-[#2D4A9C] text-white">
+      <div className="border-b border-zinc-800 bg-black text-white">
         <div className="container mx-auto px-4 py-12 md:py-16">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center px-4 py-2 bg-white/20 rounded-full mb-6">
+            <div className="inline-flex items-center px-4 py-2 border border-zinc-700 bg-zinc-900 rounded-full mb-6">
               <ShoppingCart className="w-4 h-4 mr-2" />
               <span className="text-sm font-medium">Premium Tools Catalog</span>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Premium Online Tools</h1>
-            <p className="text-lg text-white/80 mb-8">
-              Browse our collection of premium software subscriptions at wholesale prices. 
-              Get genuine licenses with instant delivery.
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">Premium digital tools.<br />Delivered without the wait.</h1>
+            <p className="text-lg text-zinc-400 mb-8">
+              Compare AI tools, software subscriptions and reseller-ready digital products with secure checkout and fast delivery.
             </p>
             
             {/* Search Bar */}
@@ -204,7 +205,7 @@ const ProductsPage = () => {
                 placeholder="Search tools like Canva, ChatGPT, Adobe..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-xl text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#FACC15]"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white text-black focus:outline-none focus:ring-2 focus:ring-zinc-400"
               />
             </div>
 
@@ -215,7 +216,7 @@ const ProductsPage = () => {
                 <button
                   key={index}
                   onClick={() => setSearchQuery(tool.name)}
-                  className="inline-flex items-center px-3 py-1 bg-white/10 rounded-full text-sm hover:bg-white/20 transition-colors"
+                  className="inline-flex items-center px-3 py-1 border border-zinc-700 rounded-full text-sm hover:border-white transition-colors"
                 >
                   <Tag className="w-3 h-3 mr-1" />
                   {tool.name} ({tool.discount}% OFF)
@@ -389,7 +390,7 @@ const ProductsPage = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {visibleProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} onViewDetails={() => handleViewDetails(product.id)} />
+                    <ProductCard key={product.id} product={product} onViewDetails={() => handleViewDetails(product)} />
                   ))}
                 </div>
 
@@ -484,7 +485,7 @@ const ProductsPage = () => {
                                 Instant delivery
                               </div>
                               <button 
-                                onClick={() => handleViewDetails(product.id)}
+                                onClick={() => handleViewDetails(product)}
                                 className="bg-[#1E3A8A] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#1E3A8A]/90 hover:shadow-lg transition-all"
                               >
                                 View Details

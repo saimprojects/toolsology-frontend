@@ -53,7 +53,7 @@ function ProductCard({ product, featured = false }) {
           <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
         </button>
         <Link 
-          to={`/product/${product.id}`}
+          to={`/product/${product.slug || product.id}`}
           className="w-9 h-9 rounded-lg bg-white shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors border border-[#D1D5DB]"
         >
           <Eye className="w-4 h-4 text-gray-600 hover:text-[#1E3A8A]" />
@@ -61,7 +61,7 @@ function ProductCard({ product, featured = false }) {
       </div>
 
       {/* Image Container */}
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product.slug || product.id}`}>
         <div className="relative h-52 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {mainImage ? (
             <>
@@ -112,7 +112,7 @@ function ProductCard({ product, featured = false }) {
         )}
 
         {/* Title */}
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${product.slug || product.id}`}>
           <h3 className="text-base font-bold text-[#111827] mb-2 line-clamp-2 hover:text-[#1E3A8A] transition-colors leading-tight">
             {product.title}
           </h3>
@@ -200,7 +200,7 @@ function ProductCard({ product, featured = false }) {
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Link
-              to={`/product/${product.id}`}
+              to={`/product/${product.slug || product.id}`}
               className="flex-1 bg-[#1E3A8A] text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-[#1E3A8A]/90 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <ShoppingCart className="w-4 h-4" />

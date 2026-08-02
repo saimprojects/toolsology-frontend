@@ -7,6 +7,7 @@ import {
 } from "../api/customer";
 import { useCurrency } from "../context/CurrencyContext";
 import GearLoader from "../components/layout/GearLoader";
+import Seo from "../components/layout/Seo";
 
 export default function CheckoutPage() {
   const { currency, format } = useCurrency();
@@ -71,15 +72,18 @@ export default function CheckoutPage() {
     setCopied(key); setTimeout(() => setCopied(""), 1500);
   }
 
-  if (loading) return <div className="container mx-auto px-4 py-20 flex justify-center text-[#1E3A8A]"><GearLoader size="lg" /></div>;
+  if (loading) return <div className="min-h-screen bg-black px-4 py-20 flex justify-center text-white"><GearLoader size="lg" label="Preparing secure checkout" /></div>;
   if (!product) return <div className="container mx-auto px-4 py-20 text-center">Product not found.</div>;
 
   return (
-    <div className="container mx-auto px-4 py-10 max-w-2xl">
-      <h1 className="text-3xl font-bold text-[#111827] mb-1">Checkout</h1>
-      <p className="text-gray-600 mb-8">
+    <div className="min-h-screen bg-black px-4 py-12 text-white">
+      <Seo title="Secure Checkout" description="Complete your secure Toolsology purchase." noindex />
+      <div className="mx-auto max-w-2xl">
+      <div className="mb-8 inline-flex rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-300">Encrypted checkout</div>
+      <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Complete your purchase</h1>
+      <p className="text-zinc-400 mb-8">
         {product.title}{offer ? ` · ${offer.label}` : ""} —{" "}
-        <span className="font-bold text-[#1E3A8A]">{format(offer?.price)}</span>
+        <span className="font-bold text-white">{format(offer?.price)}</span>
       </p>
 
       {/* Success */}
@@ -131,7 +135,7 @@ export default function CheckoutPage() {
       )}
 
       {!result && (
-        <div className="bg-white border rounded-2xl p-6 shadow-sm">
+        <div className="bg-white text-black border border-zinc-200 rounded-[2rem] p-6 sm:p-8 shadow-2xl shadow-white/5">
           <div className="mb-5 rounded-lg bg-gray-50 border p-3 text-sm">
             {paymentType !== "local" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}
           </div>
@@ -189,7 +193,7 @@ export default function CheckoutPage() {
               type="email" placeholder="Email (optional, for delivery)" value={email} onChange={(e) => setEmail(e.target.value)} />
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button disabled={submitting}
-              className="w-full bg-[#1E3A8A] text-white rounded-lg py-3 font-bold hover:bg-[#1E3A8A]/90 disabled:opacity-60">
+              className="w-full bg-black text-white rounded-xl py-3.5 font-bold hover:bg-zinc-800 disabled:opacity-60">
               {submitting ? <GearLoader size="sm" label="Verifying payment" /> : `Verify & get instantly — ${format(offer?.price)}`}
             </button>
             <div className="flex items-center justify-center text-xs text-gray-500 gap-1">
@@ -198,6 +202,7 @@ export default function CheckoutPage() {
           </form>
         </div>
       )}
+      </div>
     </div>
   );
 }

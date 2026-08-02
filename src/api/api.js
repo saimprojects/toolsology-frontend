@@ -2,14 +2,15 @@
 
 // Read base URL from Vite env
 // .env: VITE_API_URL=https://toolsology.up.railway.app/
-const RAW_BASE_URL = import.meta.env.VITE_API_URL;
+const RAW_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : "http://127.0.0.1:8000/");
 
 // Normalize: ensure it ends with single slash
 function normalizeBaseUrl(url) {
   try {
     const u = new URL(url);
     // Ensure trailing slash
-    return u.origin + (u.pathname.endsWith("/") ? u.pathname : u.pathname + "/");
+    const path = u.pathname.replace(/\/api\/?$/, "/");
+    return u.origin + (path.endsWith("/") ? path : path + "/");
   } catch (e) {
     // Fallback if env URL is invalid
     return "http://127.0.0.1:8000/";
@@ -134,7 +135,18 @@ export async function getAllProductsWithPageSize(pageSize = 100) {
 
 export async function getProductById(id) {
   if (!id) throw new Error("Product ID is required");
-  return request(`/api/products/${id}/`);
+  return /^\d+$/.test(String(id))
+    ? request(`/api/products/${id}/`)
+    : request(`/api/products/by-slug/${encodeURIComponent(id)}/`);
+}
+
+export async function getBlogPosts() {
+  const data = await request("/api/blog/");
+  return data?.results || data || [];
+}
+
+export async function getBlogPost(slug) {
+  return request(`/api/blog/${encodeURIComponent(slug)}/`);
 }
 
 export async function getCategories() {

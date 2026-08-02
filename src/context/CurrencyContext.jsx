@@ -2,8 +2,8 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 
 const CurrencyContext = createContext(null);
 const STORAGE_KEY = "toolsology_currency";
-const RAW_API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/";
-const API_BASE = RAW_API.endsWith("/") ? RAW_API.slice(0, -1) : RAW_API;
+const RAW_API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : "http://127.0.0.1:8000/");
+const API_BASE = (RAW_API.endsWith("/") ? RAW_API.slice(0, -1) : RAW_API).replace(/\/api$/, "");
 
 export function CurrencyProvider({ children }) {
   const [currency, setCurrencyState] = useState(() => localStorage.getItem(STORAGE_KEY) || "PKR");

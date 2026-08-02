@@ -1,6 +1,7 @@
 // src/pages/HomePage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Seo from '../components/layout/Seo';
 import Hero from '../components/home/hero';
 import ProductCard from '../components/products/ProductCard';
 import Testimonials from '../components/home/Testimonials';
@@ -90,7 +91,8 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="fade-in bg-[#F3F4F6]">
+    <div className="fade-in bg-black">
+      <Seo title="Premium Digital Tools & Subscriptions in Pakistan" description="Buy trusted AI tools, premium software and digital subscriptions in Pakistan with instant delivery, secure payments and reseller pricing." path="/" schema={{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Toolsology","url":"https://www.toolsology.shop"},{"@type":"WebSite","name":"Toolsology","url":"https://www.toolsology.shop","potentialAction":{"@type":"SearchAction","target":"https://www.toolsology.shop/products?q={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Where can I buy premium digital tools in Pakistan?","acceptedAnswer":{"@type":"Answer","text":"Toolsology provides AI tools, software subscriptions and digital products with local bank and international Binance payment options."}},{"@type":"Question","name":"Do digital subscriptions include instant delivery?","acceptedAnswer":{"@type":"Answer","text":"Eligible in-stock products are delivered automatically after payment verification."}},{"@type":"Question","name":"Does Toolsology offer reseller pricing?","acceptedAnswer":{"@type":"Answer","text":"Approved resellers get wholesale offers, wallet purchasing, order management and API access."}}]}]}} />
       <Hero />
       
       {/* Featured Digital Tools */}
@@ -258,6 +260,26 @@ const HomePage = () => {
               <Shield className="w-4 h-4 mr-2 text-[#1E3A8A]" />
               <span>All subscriptions include 30-day money-back guarantee</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Answer-first content for customers and search assistants */}
+      <section className="bg-black px-4 py-20 text-white">
+        <div className="mx-auto max-w-5xl">
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-zinc-500">Quick answers</p>
+          <h2 className="mb-10 max-w-2xl text-4xl font-bold tracking-tight md:text-5xl">Everything you need to buy with confidence.</h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              ["Where can I buy premium digital tools in Pakistan?", "Toolsology provides AI tools, software subscriptions and digital products with local bank and international Binance payment options."],
+              ["Do subscriptions include instant delivery?", "Eligible in-stock products are delivered automatically after payment verification. Availability is shown on every product page."],
+              ["Is reseller pricing available?", "Approved resellers get wholesale offers, wallet purchasing, order management and protected API access."],
+            ].map(([question, answer]) => (
+              <article key={question} className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+                <h3 className="mb-3 text-lg font-bold">{question}</h3>
+                <p className="text-sm leading-6 text-zinc-400">{answer}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
