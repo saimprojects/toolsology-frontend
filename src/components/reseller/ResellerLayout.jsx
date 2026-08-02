@@ -1,9 +1,9 @@
 // src/components/reseller/ResellerLayout.jsx
 import React, { useEffect, useState, useCallback } from "react";
-import { NavLink, Outlet, useNavigate, Link } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Package, Receipt, Settings as SettingsIcon,
-  LogOut, Store, Menu, X, Code2,
+  LogOut, Store, Menu, Code2, Lock,
 } from "lucide-react";
 import { isLoggedIn, clearTokens, getMe } from "../../api/reseller";
 import { CurrencyToggle, useCurrency } from "../../context/CurrencyContext";
@@ -19,6 +19,7 @@ const links = [
 export default function ResellerLayout() {
   const { format } = useCurrency();
   const nav = useNavigate();
+  const location = useLocation();
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -59,7 +60,11 @@ export default function ResellerLayout() {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {links.map(({ to, label, icon: Icon, end }) => (
+        {links.map(({ to, label, icon: Icon, end }) => !me?.can_operate && !end ? (
+          <div key={to} className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-600" title={`Deposit ${format(me?.min_deposit)} to unlock`}>
+            <Icon className="h-4 w-4" />{label}<Lock className="ml-auto h-3.5 w-3.5" />
+          </div>
+        ) : (
           <NavLink
             key={to}
             to={to}
@@ -105,7 +110,17 @@ export default function ResellerLayout() {
         </div>
 
         <main className="p-4 sm:p-8 max-w-6xl mx-auto">
-          <Outlet context={{ me, refresh }} />
+          {!me?.can_operate && location.pathname !== "/reseller/app" ? (
+            <div className="flex min-h-[70vh] items-center justify-center">
+              <div className="w-full max-w-xl rounded-[2rem] border border-zinc-200 bg-white p-8 text-center shadow-xl sm:p-12">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-black text-white"><Lock className="h-9 w-9" /></div>
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-zinc-400">Panel locked</p>
+                <h1 className="text-3xl font-bold tracking-tight text-black">Activate your reseller panel</h1>
+                <p className="mx-auto mt-4 max-w-md text-zinc-500">Products, orders, settings and API details are protected. Deposit <b className="text-black">{format(me?.min_deposit)}</b> first to activate and unlock the complete panel.</p>
+                <Link to="/reseller/app" className="mt-8 inline-flex rounded-xl bg-black px-6 py-3 font-bold text-white hover:bg-zinc-800">Go to Overview & deposit</Link>
+              </div>
+            </div>
+          ) : <Outlet context={{ me, refresh }} />}
         </main>
       </div>
     </div>
