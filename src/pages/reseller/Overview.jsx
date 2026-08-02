@@ -6,14 +6,15 @@ import { useCurrency } from "../../context/CurrencyContext";
 import GearLoader from "../../components/layout/GearLoader";
 
 export default function Overview() {
-  const { currency, format } = useCurrency();
+  const { format } = useCurrency();
   const { me, refresh } = useOutletContext();
   const [methods, setMethods] = useState([]);
   const [txns, setTxns] = useState([]);
   const [trx, setTrx] = useState("");
   const [binance, setBinance] = useState({ enabled: false });
   const [binanceMode, setBinanceMode] = useState("binance");
-  const paymentType = currency === "USD" ? binanceMode : "local";
+  const [paymentChannel, setPaymentChannel] = useState("local");
+  const paymentType = paymentChannel === "local" ? "local" : binanceMode;
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -61,8 +62,11 @@ export default function Overview() {
 
       <div className="bg-white border rounded-xl p-5 mb-6">
         <h2 className="font-semibold mb-3">Add funds</h2>
-        <div className="text-sm bg-gray-50 border rounded-lg p-2 mb-3">{currency === "USD" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}</div>
-        {currency === "USD" && binance.wallet_enabled && binance.pay_id_enabled && <div className="flex gap-2 mb-3"><button type="button" onClick={() => setBinanceMode("binance")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance" ? "border-yellow-500 bg-yellow-50" : ""}`}>Wallet address</button><button type="button" onClick={() => setBinanceMode("binance_id")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance_id" ? "border-yellow-500 bg-yellow-50" : ""}`}>Binance ID</button></div>}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <button type="button" onClick={() => setPaymentChannel("local")} className={`rounded-xl border-2 p-3 text-left font-semibold ${paymentChannel === "local" ? "border-black bg-black text-white" : "border-zinc-200"}`}>Pakistani banks<span className="block text-xs font-normal opacity-70">Bank, JazzCash & wallet</span></button>
+          <button type="button" onClick={() => setPaymentChannel("binance")} className={`rounded-xl border-2 p-3 text-left font-semibold ${paymentChannel === "binance" ? "border-black bg-black text-white" : "border-zinc-200"}`}>Binance<span className="block text-xs font-normal opacity-70">International payment</span></button>
+        </div>
+        {paymentChannel === "binance" && binance.wallet_enabled && binance.pay_id_enabled && <div className="flex gap-2 mb-3"><button type="button" onClick={() => setBinanceMode("binance")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance" ? "border-yellow-500 bg-yellow-50 text-black" : ""}`}>Wallet address</button><button type="button" onClick={() => setBinanceMode("binance_id")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance_id" ? "border-yellow-500 bg-yellow-50 text-black" : ""}`}>Binance ID</button></div>}
         <div className="space-y-1.5 mb-3 text-sm">
           {paymentType === "local" && methods.map((m) => (
             <div key={m.id} className="flex items-center gap-2">
@@ -75,7 +79,7 @@ export default function Overview() {
           {paymentType === "local" && methods.length === 0 && <p className="text-gray-400">No payment methods yet.</p>}
           {paymentType === "binance" && binance.wallet_enabled && <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3"><b>{binance.coin} · {binance.network}</b><div className="font-mono break-all">{binance.address}</div><div className="text-gray-500 mt-1">Wallet credit rate: {format(binance.pkr_per_coin)} per {binance.coin}</div></div>}
           {paymentType === "binance_id" && binance.pay_id_enabled && <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3"><b>Binance ID · {binance.coin}</b><div className="font-mono">{binance.pay_id}</div><div className="text-gray-500 mt-1">Enter the Binance Pay Transaction ID after sending.</div></div>}
-          {currency === "USD" && !binance.enabled && <p className="text-red-600">Binance is unavailable. Select PKR from the currency toggle.</p>}
+          {paymentChannel === "binance" && !binance.enabled && <p className="text-red-600">Binance is currently unavailable.</p>}
         </div>
         <form onSubmit={doTopup} className="flex gap-2">
           <input className="flex-1 border rounded-lg px-3 py-2" placeholder={paymentType === "binance_id" ? "Binance Pay Transaction ID" : paymentType === "binance" ? "Binance blockchain TxID" : "Transaction ID (TID)"}

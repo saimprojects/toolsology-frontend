@@ -41,7 +41,7 @@ export default function ResellerLayout() {
   }
 
   const Sidebar = (
-    <aside className="w-72 bg-black text-zinc-300 flex flex-col min-h-screen border-r border-zinc-800">
+    <aside className="w-72 bg-black text-zinc-300 flex flex-col h-screen overflow-y-auto border-r border-zinc-800">
       <Link to="/" className="flex items-center gap-2 px-5 py-5 border-b border-white/10">
         <div className="bg-white h-10 w-10 rounded-xl flex items-center justify-center">
           <Store className="w-5 h-5 text-black" />
@@ -87,7 +87,7 @@ export default function ResellerLayout() {
   return (
     <div className="min-h-screen bg-zinc-100 flex">
       {/* Desktop sidebar */}
-      <div className="hidden lg:block">{Sidebar}</div>
+      <div className="hidden lg:block fixed inset-y-0 left-0 z-30 w-72">{Sidebar}</div>
 
       {/* Mobile sidebar */}
       {open && (
@@ -97,7 +97,7 @@ export default function ResellerLayout() {
         </div>
       )}
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 lg:ml-72">
         <div className="lg:hidden flex items-center justify-between bg-black text-white border-b border-zinc-800 px-4 py-3">
           <button onClick={() => setOpen(true)}><Menu className="w-6 h-6" /></button>
           <span className="font-semibold">Reseller Panel</span>

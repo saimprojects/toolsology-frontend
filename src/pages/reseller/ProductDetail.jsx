@@ -7,9 +7,10 @@ import {
 } from "../../api/reseller";
 import { useCurrency } from "../../context/CurrencyContext";
 import GearLoader from "../../components/layout/GearLoader";
+import { X, Wallet, Landmark, Bitcoin } from "lucide-react";
 
 export default function ProductDetail() {
-  const { currency, format } = useCurrency();
+  const { format } = useCurrency();
   const { id } = useParams();
   const { me, refresh } = useOutletContext();
   const [product, setProduct] = useState(null);
@@ -18,11 +19,11 @@ export default function ProductDetail() {
   const [methods, setMethods] = useState([]);
   const [binance, setBinance] = useState({ enabled: false });
   const [binanceMode, setBinanceMode] = useState("binance");
-  const paymentType = currency === "USD" ? binanceMode : "local";
   const [loading, setLoading] = useState(true);
 
   const [expandedOffer, setExpandedOffer] = useState(null);
-  const [mode, setMode] = useState(null); // 'choose' | 'wallet' | 'account'
+  const [mode, setMode] = useState(null); // 'choose' | 'wallet' | 'local' | 'binance'
+  const paymentType = mode === "local" ? "local" : binanceMode;
   const [trx, setTrx] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -152,20 +153,30 @@ export default function ProductDetail() {
       )}
 
       {mode && !delivered && selected && (
-        <div className="bg-white border rounded-xl p-5 mt-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && setMode(null)}>
+        <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] bg-white p-6 text-black shadow-2xl sm:p-8">
+          <button type="button" onClick={() => setMode(null)} className="absolute right-5 top-5 rounded-full bg-zinc-100 p-2 hover:bg-zinc-200" aria-label="Close payment"><X className="h-5 w-5" /></button>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Secure reseller checkout</p>
+          <h2 className="mb-1 mt-2 pr-10 text-2xl font-bold">Purchase {selected.label}</h2>
+          <p className="mb-6 text-zinc-500">Total: <b className="text-black">{format(selected.price)}</b></p>
           {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
 
           {mode === "choose" && (
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-3">
               <button onClick={() => setMode("wallet")}
-                className="border-2 border-[#1E3A8A] rounded-lg p-4 text-left hover:bg-blue-50">
-                <div className="font-semibold text-[#1E3A8A]">Pay via Wallet</div>
+                className="rounded-2xl border-2 border-zinc-200 p-5 text-left hover:border-black">
+                <Wallet className="mb-4 h-6 w-6" /><div className="font-semibold">Wallet balance</div>
                 <div className="text-sm text-gray-500">Balance: {format(me?.wallet_balance)}</div>
               </button>
-              <button onClick={() => setMode("account")}
-                className="border-2 border-gray-300 rounded-lg p-4 text-left hover:bg-gray-50">
-                <div className="font-semibold">Pay via Account</div>
+              <button onClick={() => setMode("local")}
+                className="rounded-2xl border-2 border-zinc-200 p-5 text-left hover:border-black">
+                <Landmark className="mb-4 h-6 w-6" /><div className="font-semibold">Pakistani banks</div>
                 <div className="text-sm text-gray-500">Bank / JazzCash + TID</div>
+              </button>
+              <button onClick={() => setMode("binance")}
+                className="rounded-2xl border-2 border-zinc-200 p-5 text-left hover:border-black">
+                <Bitcoin className="mb-4 h-6 w-6" /><div className="font-semibold">Binance</div>
+                <div className="text-sm text-gray-500">International payment</div>
               </button>
             </div>
           )}
@@ -181,10 +192,10 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {mode === "account" && (
+          {(mode === "local" || mode === "binance") && (
             <form onSubmit={payAccount}>
-              <div className="text-sm bg-gray-50 border rounded-lg p-2 mb-3">{currency === "USD" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}</div>
-              {currency === "USD" && binance.wallet_enabled && binance.pay_id_enabled && <div className="flex gap-2 mb-3"><button type="button" onClick={() => setBinanceMode("binance")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance" ? "border-yellow-500 bg-yellow-50" : ""}`}>Wallet address</button><button type="button" onClick={() => setBinanceMode("binance_id")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance_id" ? "border-yellow-500 bg-yellow-50" : ""}`}>Binance ID</button></div>}
+              <div className="text-sm bg-gray-50 border rounded-lg p-2 mb-3">{mode === "binance" ? "International payment · Binance" : "Pakistan payment · Bank / wallet"}</div>
+              {mode === "binance" && binance.wallet_enabled && binance.pay_id_enabled && <div className="flex gap-2 mb-3"><button type="button" onClick={() => setBinanceMode("binance")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance" ? "border-yellow-500 bg-yellow-50" : ""}`}>Wallet address</button><button type="button" onClick={() => setBinanceMode("binance_id")} className={`border rounded-lg px-3 py-2 text-sm ${binanceMode === "binance_id" ? "border-yellow-500 bg-yellow-50" : ""}`}>Binance ID</button></div>}
               <p className="text-sm mb-2">Send <b>{format(selected.price)}</b> to:</p>
               <div className="space-y-1 text-sm mb-3">
                 {paymentType === "local" && methods.map((m) => (
@@ -196,7 +207,7 @@ export default function ProductDetail() {
                 ))}
                 {paymentType === "binance" && binance.wallet_enabled && <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3"><div>Send <b>{(Math.ceil((Number(selected.price) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b> via <b>{binance.network}</b></div><div className="font-mono break-all mt-1">{binance.address}</div></div>}
                 {paymentType === "binance_id" && binance.pay_id_enabled && <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3"><div>Send <b>{(Math.ceil((Number(selected.price) / Number(binance.pkr_per_coin)) * 100) / 100).toFixed(2)} {binance.coin}</b> to Binance ID</div><div className="font-mono mt-1">{binance.pay_id}</div></div>}
-                {currency === "USD" && !binance.enabled && <p className="text-red-600">Binance is unavailable. Select PKR from the currency toggle.</p>}
+                {mode === "binance" && !binance.enabled && <p className="text-red-600">Binance is currently unavailable.</p>}
               </div>
               <input className="w-full border rounded-lg px-3 py-2 mb-3" placeholder={paymentType === "binance_id" ? "Binance Pay Transaction ID" : paymentType === "binance" ? "Binance blockchain TxID" : "Enter Transaction ID (TID)"}
                 value={trx} onChange={(e) => setTrx(e.target.value)} />
@@ -207,6 +218,7 @@ export default function ProductDetail() {
               <button type="button" onClick={() => setMode("choose")} className="ml-3 text-sm text-gray-500">Back</button>
             </form>
           )}
+        </div>
         </div>
       )}
     </div>
