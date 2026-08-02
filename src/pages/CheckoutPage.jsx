@@ -6,6 +6,7 @@ import {
   isLoggedIn, getProduct, getRetailOffers, getPaymentMethods, getBinanceConfig, retailCheckout,
 } from "../api/customer";
 import { useCurrency } from "../context/CurrencyContext";
+import GearLoader from "../components/layout/GearLoader";
 
 export default function CheckoutPage() {
   const { currency, format } = useCurrency();
@@ -70,7 +71,7 @@ export default function CheckoutPage() {
     setCopied(key); setTimeout(() => setCopied(""), 1500);
   }
 
-  if (loading) return <div className="container mx-auto px-4 py-20 text-center">Loading…</div>;
+  if (loading) return <div className="container mx-auto px-4 py-20 flex justify-center text-[#1E3A8A]"><GearLoader size="lg" /></div>;
   if (!product) return <div className="container mx-auto px-4 py-20 text-center">Product not found.</div>;
 
   return (
@@ -189,7 +190,7 @@ export default function CheckoutPage() {
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button disabled={submitting}
               className="w-full bg-[#1E3A8A] text-white rounded-lg py-3 font-bold hover:bg-[#1E3A8A]/90 disabled:opacity-60">
-              {submitting ? "Verifying…" : `Verify & get instantly — ${format(offer?.price)}`}
+              {submitting ? <GearLoader size="sm" label="Verifying payment" /> : `Verify & get instantly — ${format(offer?.price)}`}
             </button>
             <div className="flex items-center justify-center text-xs text-gray-500 gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-[#1E3A8A]" /> Just paid? If it says “not found yet”, wait a few seconds and retry.

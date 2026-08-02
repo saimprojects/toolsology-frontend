@@ -6,6 +6,7 @@ import {
   walletPurchase, accountCheckout,
 } from "../../api/reseller";
 import { useCurrency } from "../../context/CurrencyContext";
+import GearLoader from "../../components/layout/GearLoader";
 
 export default function ProductDetail() {
   const { currency, format } = useCurrency();
@@ -60,7 +61,7 @@ export default function ProductDetail() {
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
 
-  if (loading) return <div className="py-10 text-center">Loading…</div>;
+  if (loading) return <div className="py-10 flex justify-center text-[#1E3A8A]"><GearLoader size="lg" /></div>;
   if (!product) return <div className="py-10 text-center">Product not found.</div>;
 
   return (
@@ -174,7 +175,7 @@ export default function ProductDetail() {
               <p className="mb-3 text-sm">Pay <b>{format(selected.price)}</b> ({selected.label}) from wallet (balance {format(me?.wallet_balance)}).</p>
               <button disabled={busy} onClick={payWallet}
                 className="bg-[#1E3A8A] text-white px-6 py-2.5 rounded-lg font-semibold disabled:opacity-60">
-                {busy ? "Processing…" : "Confirm wallet payment"}
+                {busy ? <GearLoader size="sm" label="Processing" /> : "Confirm wallet payment"}
               </button>
               <button onClick={() => setMode("choose")} className="ml-3 text-sm text-gray-500">Back</button>
             </div>
@@ -201,7 +202,7 @@ export default function ProductDetail() {
                 value={trx} onChange={(e) => setTrx(e.target.value)} />
               <button disabled={busy}
                 className="bg-[#1E3A8A] text-white px-6 py-2.5 rounded-lg font-semibold disabled:opacity-60">
-                {busy ? "Verifying…" : "Verify & buy"}
+                {busy ? <GearLoader size="sm" label="Verifying payment" /> : "Verify & buy"}
               </button>
               <button type="button" onClick={() => setMode("choose")} className="ml-3 text-sm text-gray-500">Back</button>
             </form>

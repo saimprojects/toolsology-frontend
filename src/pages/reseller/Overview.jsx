@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { getPaymentMethods, getBinanceConfig, topupWallet, getTransactions } from "../../api/reseller";
 import { useCurrency } from "../../context/CurrencyContext";
+import GearLoader from "../../components/layout/GearLoader";
 
 export default function Overview() {
   const { currency, format } = useCurrency();
@@ -14,6 +15,7 @@ export default function Overview() {
   const [binanceMode, setBinanceMode] = useState("binance");
   const paymentType = currency === "USD" ? binanceMode : "local";
   const [msg, setMsg] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   async function load() {
     const [pm, t, bc] = await Promise.all([getPaymentMethods(), getTransactions(), getBinanceConfig()]);
@@ -25,6 +27,8 @@ export default function Overview() {
   async function doTopup(e) {
     e.preventDefault();
     setMsg(null);
+    if (busy) return;
+    setBusy(true);
     try {
       await topupWallet(trx.trim(), paymentType);
       setTrx("");
@@ -32,6 +36,8 @@ export default function Overview() {
       await refresh(); await load();
     } catch (err) {
       setMsg({ ok: false, text: err.message });
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -74,7 +80,9 @@ export default function Overview() {
         <form onSubmit={doTopup} className="flex gap-2">
           <input className="flex-1 border rounded-lg px-3 py-2" placeholder={paymentType === "binance_id" ? "Binance Pay Transaction ID" : paymentType === "binance" ? "Binance blockchain TxID" : "Transaction ID (TID)"}
             value={trx} onChange={(e) => setTrx(e.target.value)} />
-          <button className="bg-[#1E3A8A] text-white px-5 rounded-lg font-semibold">Verify & add</button>
+          <button disabled={busy} className="bg-[#1E3A8A] text-white px-5 rounded-lg font-semibold disabled:opacity-60 min-w-32">
+            {busy ? <GearLoader size="sm" label="Verifying" /> : "Verify & add"}
+          </button>
         </form>
       </div>
 
