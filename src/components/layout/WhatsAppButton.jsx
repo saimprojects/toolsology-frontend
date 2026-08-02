@@ -1,97 +1,44 @@
-// src/components/layout/WhatsAppButton.jsx
-import React, { useState, useEffect } from 'react';
-import { MessageCircle } from 'lucide-react';
-import { getWhatsAppNumber } from '../../api/api';
+import React, { useEffect, useRef, useState } from "react";
+import { MessageCircle } from "lucide-react";
+import { getWhatsAppNumber } from "../../api/api";
 
-const WhatsAppButton = () => {
-  const [whatsappNumber, setWhatsappNumber] = useState('+923001234567');
+export default function WhatsAppButton() {
+  const [whatsappNumber, setWhatsappNumber] = useState("+923001234567");
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
-    fetchWhatsAppNumber();
-    
+    getWhatsAppNumber().then((number) => number && setWhatsappNumber(number)).catch(() => {});
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Hide on scroll down, show on scroll up
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
+      const current = window.scrollY;
+      setIsVisible(!(current > lastScrollY.current && current > 180));
+      lastScrollY.current = current;
     };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
-
-  const fetchWhatsAppNumber = async () => {
-    try {
-      const number = await getWhatsAppNumber();
-      if (number) setWhatsappNumber(number);
-    } catch (error) {
-      console.error('Error fetching WhatsApp number:', error);
-    }
-  };
-
-  const handleClick = () => {
-    const message = encodeURIComponent("Hello Bunny Tools! I'm interested in your products.");
-    const url = `https://wa.me/${whatsappNumber.replace('+', '')}?text=${message}`;
-    window.open(url, '_blank');
-    
-    // Optional: Track click event
-    if (window.gtag) {
-      window.gtag('event', 'whatsapp_click', {
-        'event_category': 'engagement',
-        'event_label': 'whatsapp_button'
-      });
-    }
-  };
+  function handleClick() {
+    const message = encodeURIComponent("Hello Toolsology! I need help with a product or order.");
+    window.open(`https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${message}`, "_blank", "noopener,noreferrer");
+    window.gtag?.("event", "whatsapp_click", { event_category: "engagement", event_label: "floating_support" });
+  }
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 transition-all duration-500 ${
-      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
-    }`}>
-      <div className="relative">
-        {/* Pulsing Ring Effect */}
-        <div className="absolute -inset-4 bg-green-500 rounded-full opacity-20 animate-ping"></div>
-        <div className="absolute -inset-2 bg-green-400 rounded-full opacity-30 animate-pulse"></div>
-        
-        {/* Main Button */}
-        <button
-          onClick={handleClick}
-          className="relative bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-300 group"
-          aria-label="Chat on WhatsApp"
-        >
-          <MessageCircle className="w-7 h-7" />
-          
-          {/* Tooltip */}
-          <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 whitespace-nowrap">
-            Chat with us
-            <div className="absolute top-1/2 left-full -translate-y-1/2 border-8 border-transparent border-l-gray-900"></div>
-          </div>
-          
-          {/* Notification Badge */}
-          <div className="absolute -top-1 -right-1 bg-brand-yellow text-white text-xs w-6 h-6 rounded-full flex items-center justify-center animate-bounce">
-            1
-          </div>
-        </button>
-      </div>
-      
-      {/* Additional Buttons (Optional) */}
-      <div className="mt-3 space-y-2">
-        <button
-          onClick={() => window.open(`tel:${whatsappNumber}`, '_self')}
-          className="bg-gradient-to-r from-brand-purple to-brand-purple-light text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 w-full"
-        >
-          <span>Chat Now</span>
-        </button>
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`group fixed bottom-5 right-4 z-50 flex items-center gap-3 rounded-full border border-zinc-700 bg-black p-2 pr-4 text-white shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-1 hover:border-zinc-500 sm:bottom-6 sm:right-6 ${isVisible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-20 opacity-0"}`}
+      aria-label="Chat with Toolsology on WhatsApp"
+    >
+      <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#25D366]">
+        <MessageCircle className="h-6 w-6 fill-transparent text-white" strokeWidth={2.2} />
+        <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-black bg-white" aria-hidden="true" />
+      </span>
+      <span className="text-left">
+        <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">Support</span>
+        <span className="block text-sm font-bold leading-5">Chat on WhatsApp</span>
+      </span>
+    </button>
   );
-};
-
-export default WhatsAppButton;
+}
